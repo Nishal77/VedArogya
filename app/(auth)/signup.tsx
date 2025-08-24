@@ -10,10 +10,14 @@ import {
   Dimensions,
   KeyboardAvoidingView,
   Platform,
-  Image
+  Image,
+  Alert,
+  Modal
 } from 'react-native';
 import { useRouter } from 'expo-router';
-import { ChevronLeft, Eye, EyeOff, Camera, X } from 'lucide-react-native';
+import { ChevronLeft, Eye, EyeOff, Camera, X, Image as ImageIcon, ChevronRight, ChevronLeft as ChevronLeftIcon } from 'lucide-react-native';
+import * as ImagePicker from 'expo-image-picker';
+import DoshaAssessment from '../../components/assessment';
 
 const { width, height } = Dimensions.get('window');
 
@@ -48,7 +52,7 @@ export default function SignUp() {
   const [lifestyleType, setLifestyleType] = useState('');
   const [goal, setGoal] = useState('');
   const [profileImage, setProfileImage] = useState<string | null>(null);
-  
+
   // Dosha assessment answers
   const [doshaAnswers, setDoshaAnswers] = useState({
     bodyType: '',
@@ -58,7 +62,9 @@ export default function SignUp() {
     sleep: '',
     mood: '',
     climate: '',
-    stressResponse: ''
+    stressResponse: '',
+    digestion: '',
+    bodyTemperature: ''
   });
 
   const onBack = () => {
@@ -103,6 +109,87 @@ export default function SignUp() {
     validatePassword(text);
   };
 
+  const pickImage = async () => {
+    try {
+      // Request permissions
+      const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+      if (status !== 'granted') {
+        Alert.alert(
+          'Permission Required',
+          'Sorry, we need camera roll permissions to make this work!',
+          [{ text: 'OK' }]
+        );
+        return;
+      }
+
+      // Launch image picker
+      const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        allowsEditing: true,
+        aspect: [1, 1],
+        quality: 0.8,
+        allowsMultipleSelection: false,
+      });
+
+      if (!result.canceled && result.assets && result.assets.length > 0) {
+        setProfileImage(result.assets[0].uri);
+      }
+    } catch (error) {
+      console.error('Error picking image:', error);
+      Alert.alert('Error', 'Failed to pick image. Please try again.');
+    }
+  };
+
+  const takePhoto = async () => {
+    try {
+      // Request camera permissions
+      const { status } = await ImagePicker.requestCameraPermissionsAsync();
+      if (status !== 'granted') {
+        Alert.alert(
+          'Permission Required',
+          'Sorry, we need camera permissions to make this work!',
+          [{ text: 'OK' }]
+        );
+        return;
+      }
+
+      // Launch camera
+      const result = await ImagePicker.launchCameraAsync({
+        allowsEditing: true,
+        aspect: [1, 1],
+        quality: 0.8,
+      });
+
+      if (!result.canceled && result.assets && result.assets.length > 0) {
+        setProfileImage(result.assets[0].uri);
+      }
+    } catch (error) {
+      console.error('Error taking photo:', error);
+      Alert.alert('Error', 'Failed to take photo. Please try again.');
+    }
+  };
+
+  const showImageOptions = () => {
+    Alert.alert(
+      'Add Profile Photo',
+      'Choose how you want to add your profile photo',
+      [
+        {
+          text: 'Camera',
+          onPress: takePhoto
+        },
+        {
+          text: 'Gallery',
+          onPress: pickImage
+        },
+        {
+          text: 'Cancel',
+          style: 'cancel'
+        }
+      ]
+    );
+  };
+
   const renderStep1 = () => (
     <View className="flex-1">
       <View className="mb-8">
@@ -114,7 +201,7 @@ export default function SignUp() {
         <View className='mb-2'>
           <Text className="text-gray-700 font-semibold mb-2 text-base">Full Name</Text>
           <TextInput
-            className="bg-gray-50 border border-gray-200 rounded-2xl px-5 py-5 text-gray-800 text-base"
+            className="bg-gray-50 border border-black/30 rounded-2xl px-5 py-5 text-gray-800 text-base"
             placeholder="Enter your full name"
             placeholderTextColor="#9CA3AF"
             value={fullName}
@@ -127,7 +214,7 @@ export default function SignUp() {
           <Text className="text-gray-700 font-semibold mb-2 text-base">Email</Text>
           <View className="flex-row items-center">
             <TextInput
-              className="flex-1 bg-gray-50 border border-gray-200 border-r-0 rounded-l-2xl px-5 py-5 text-gray-800 text-base"
+              className="flex-1 bg-gray-50 border border-black/30  border-r-0 rounded-l-2xl px-5 py-5 text-gray-800 text-base"
               placeholder="Enter your email"
               placeholderTextColor="#9CA3AF"
               value={email}
@@ -149,7 +236,7 @@ export default function SignUp() {
               <Text className="text-gray-700 font-medium text-base">+91</Text>
             </View>
             <TextInput
-              className="flex-1 bg-gray-50 border border-gray-200 border-l-0 rounded-r-2xl px-5 py-5 text-gray-800 text-base"
+              className="flex-1 bg-gray-50 border border-black/30  border-l-0 rounded-r-2xl px-5 py-5 text-gray-800 text-base"
               placeholder="Enter your phone number"
               placeholderTextColor="#9CA3AF"
               value={phoneNumber}
@@ -171,7 +258,7 @@ export default function SignUp() {
           <Text className="text-gray-700 font-semibold mb-2 text-base">Password</Text>
           <View className="flex-row items-center">
             <TextInput
-              className="flex-1 bg-gray-50 border border-gray-200 border-r-0 rounded-l-2xl px-5 py-5 text-gray-800 text-base"
+              className="flex-1 bg-gray-50 border border-black/30  border-r-0 rounded-l-2xl px-5 py-5 text-gray-800 text-base"
               placeholder="Create a password"
               placeholderTextColor="#9CA3AF"
               value={password}
@@ -242,7 +329,7 @@ export default function SignUp() {
           <Text className="text-gray-700 font-semibold mb-2 text-base">Confirm Password</Text>
           <View className="flex-row items-center">
             <TextInput
-              className="flex-1 bg-gray-50 border border-gray-200 border-r-0 rounded-l-2xl px-5 py-5 text-gray-800 text-base"
+              className="flex-1 bg-gray-50 border border-black/30  border-r-0 rounded-l-2xl px-5 py-5 text-gray-800 text-base"
               placeholder="Confirm your password"
               placeholderTextColor="#9CA3AF"
               value={confirmPassword}
@@ -291,24 +378,27 @@ export default function SignUp() {
       <View className="space-y-12">
         <View className='mb-2'>
           <Text className="text-gray-700 font-semibold mb-2 text-base">Select Your Gender</Text>
-          <View className="flex-row space-x-4">
+          <View className="flex-row">
             {['Male', 'Female', 'Prefer not to say'].map((option, idx, arr) => (
               <TouchableOpacity
                 key={option}
-                className={`flex-1 items-center justify-center py-3 px-3 rounded-2xl border-2 transition-all duration-200
-                  ${idx !== arr.length - 1 ? 'mr-2' : ''}
-                  ${gender === option 
-                    ? 'border-gray-900 bg-gray-900/90' 
-                    : 'border-gray-200 bg-gray-50'
-                  }
-                  active:bg-gray-800/80 active:border-gray-900
-                `}
+                className={[
+                  "flex-1 items-center justify-center py-3 px-3 rounded-2xl border-2 border-black/30 transition-all duration-200",
+                  idx !== arr.length - 1 ? "mr-2" : "",
+                  gender === option
+                    ? "bg-gray-900/90"
+                    : "bg-gray-50",
+                  "active:bg-gray-800/80"
+                ].join(" ")}
                 activeOpacity={0.85}
                 onPress={() => setGender(option)}
               >
-                <Text className={`font-medium text-base text-center transition-all duration-200
-                  ${gender === option ? 'text-white' : 'text-gray-600'}
-                `}>
+                <Text
+                  className={[
+                    "font-medium text-base text-center transition-all duration-200",
+                    gender === option ? "text-white" : "text-gray-600"
+                  ].join(" ")}
+                >
                   {option}
                 </Text>
               </TouchableOpacity>
@@ -319,19 +409,53 @@ export default function SignUp() {
         <View className='mb-2'>
           <Text className="text-gray-700 font-semibold mb-2 text-base">Date of Birth</Text>
           <TextInput
-            className="bg-gray-50 border border-gray-200 rounded-2xl px-5 py-5 text-gray-800 text-base"
-            placeholder="MM/DD/YYYY"
+            className="bg-gray-50 border border-black/30  rounded-2xl px-5 py-5 text-gray-800 text-base"
+            placeholder="DD/MM/YYYY"
             placeholderTextColor="#9CA3AF"
             value={dateOfBirth}
-            onChangeText={setDateOfBirth}
+            onChangeText={(text) => {
+              // Remove all non-numeric characters
+              const cleaned = text.replace(/[^0-9]/g, '');
+              
+              // Format as DD/MM/YYYY
+              let formatted = '';
+              if (cleaned.length >= 1) formatted += cleaned.slice(0, 2);
+              if (cleaned.length >= 3) formatted += '/' + cleaned.slice(2, 4);
+              if (cleaned.length >= 5) formatted += '/' + cleaned.slice(4, 8);
+              
+              setDateOfBirth(formatted);
+            }}
+            keyboardType="numeric"
+            maxLength={10}
           />
+          <Text className="text-gray-500 text-sm mt-2">Enter your date of birth (DD/MM/YYYY)</Text>
+          {dateOfBirth && dateOfBirth.length === 10 && (
+            <Text className="text-gray-600 text-sm mt-1">
+              Age: {(() => {
+                try {
+                  const [day, month, year] = dateOfBirth.split('/');
+                  const birthDate = new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
+                  const today = new Date();
+                  const age = today.getFullYear() - birthDate.getFullYear();
+                  const monthDiff = today.getMonth() - birthDate.getMonth();
+                  
+                  if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+                    return age - 1;
+                  }
+                  return age;
+                } catch (error) {
+                  return '--';
+                }
+              })()} years
+            </Text>
+          )}
         </View>
         
         <View className="flex-row mb-2">
           <View className="flex-1 mr-2">
             <Text className="text-gray-700 font-semibold mb-2 text-base">Weight (kg)</Text>
             <TextInput
-              className="bg-gray-50 border border-gray-200 rounded-2xl px-5 py-5 text-gray-800 text-base"
+              className="bg-gray-50 border border-black/30  rounded-2xl px-5 py-5 text-gray-800 text-base"
               placeholder="70"
               placeholderTextColor="#9CA3AF"
               value={weight}
@@ -342,7 +466,7 @@ export default function SignUp() {
           <View className="flex-1">
             <Text className="text-gray-700 font-semibold mb-2 text-base">Height (cm)</Text>
             <TextInput
-              className="bg-gray-50 border border-gray-200 rounded-2xl px-5 py-5 text-gray-800 text-base"
+              className="bg-gray-50 border border-black/30  rounded-2xl px-5 py-5 text-gray-800 text-base"
               placeholder="170"
               placeholderTextColor="#9CA3AF"
               value={height}
@@ -352,7 +476,7 @@ export default function SignUp() {
           </View>
         </View>
         
-        <View>
+        <View className='mb-2'>
           <Text className="text-gray-700 font-semibold mb-2 text-base">How active are you daily?</Text>
           <View>
             {[
@@ -376,7 +500,7 @@ export default function SignUp() {
                   onPress={() => setLifestyleType(option.key)}
                 >
                   <Text className={`font-semibold text-base text-left transition-all duration-200
-                    ${isSelected ? 'text-white' : 'text-gray-700'}
+                    ${isSelected ? 'text-white' : 'text-gray-600'}
                   `}>
                     {option.label}
                   </Text>
@@ -386,8 +510,8 @@ export default function SignUp() {
           </View>
         </View>
         
-        <View>
-          <Text className="text-gray-700 font-semibold mb-5 text-base">Goal / Focus</Text>
+        <View className='mb-2'>
+          <Text className="text-gray-700 font-semibold mb-2 text-base">Goal / Focus</Text>
           <View className="space-y-4">
             {[
               'Balance stress',
@@ -398,7 +522,7 @@ export default function SignUp() {
             ].map((option) => (
               <TouchableOpacity
                 key={option}
-                className={`py-5 px-6 rounded-2xl border-2 transition-all duration-200
+                className={`py-5 px-6 rounded-2xl border-2 transition-all duration-200 mb-1
                   ${goal === option 
                     ? 'border-gray-900 bg-gray-900/90' 
                     : 'border-gray-200 bg-gray-50'
@@ -437,13 +561,18 @@ export default function SignUp() {
                 </TouchableOpacity>
               </View>
             ) : (
-              <TouchableOpacity className="w-32 h-32 bg-gray-100 border-2 border-dashed border-gray-300 rounded-2xl items-center justify-center">
-                <Camera size={32} color="#9CA3AF" />
-                <Text className="text-gray-500 text-sm mt-2 text-center">Add Photo</Text>
+              <TouchableOpacity 
+                className="w-32 h-32 bg-gray-100 border-2 border-dashed border-gray-300 rounded-2xl items-center justify-center"
+                onPress={showImageOptions}
+              >
+                <View className="items-center">
+                  <ImageIcon size={32} color="#9CA3AF" />
+                  <Text className="text-gray-500 text-sm mt-2 text-center">Add Photo</Text>
+                </View>
               </TouchableOpacity>
             )}
             <Text className="text-gray-500 text-sm mt-3 text-center">
-              Tap to add a profile picture
+              {profileImage ? 'Tap the X to remove photo' : 'Tap to add a profile picture'}
             </Text>
           </View>
         </View>
@@ -452,204 +581,10 @@ export default function SignUp() {
   );
 
   const renderStep3 = () => (
-    <View className="flex-1">
-      <View className="mb-10">
-        <Text className="text-3xl font-bold text-gray-800 mb-3">Step 3</Text>
-        <Text className="text-lg text-gray-600 leading-6">Dosha Assessment</Text>
-      </View>
-      
-      <View className="space-y-10">
-        <View className="bg-gradient-to-r from-green-50 to-blue-50 p-8 rounded-3xl border border-green-100">
-          <Text className="text-gray-700 text-center text-lg leading-7 font-medium">
-            Answer these 8 questions to discover your unique dosha constitution and unlock personalized wellness recommendations
-          </Text>
-        </View>
-        
-        <View className="bg-white p-8 rounded-3xl border border-gray-100 shadow-sm">
-          <Text className="text-gray-700 font-bold mb-6 text-lg">1. What best describes your body type?</Text>
-          <View className="space-y-4">
-            {['Slim & light', 'Medium & muscular', 'Broad & solid'].map((option) => (
-              <TouchableOpacity
-                key={option}
-                className={`py-5 px-6 rounded-2xl border-2 ${
-                  doshaAnswers.bodyType === option 
-                    ? 'border-[#8DB600] bg-[#8DB600]/10' 
-                    : 'border-gray-200 bg-gray-50'
-                }`}
-                onPress={() => handleDoshaAnswer('bodyType', option)}
-              >
-                <Text className={`font-medium text-base ${
-                  doshaAnswers.bodyType === option ? 'text-[#8DB600]' : 'text-gray-600'
-                }`}>
-                  {option}
-                </Text>
-              </TouchableOpacity>
-            ))}
-          </View>
-        </View>
-        
-        <View className="bg-white p-8 rounded-3xl border border-gray-100 shadow-sm">
-          <Text className="text-gray-700 font-bold mb-6 text-lg">2. How is your skin usually?</Text>
-          <View className="space-y-4">
-            {['Dry & rough', 'Warm & sensitive', 'Oily & smooth'].map((option) => (
-              <TouchableOpacity
-                key={option}
-                className={`py-5 px-6 rounded-2xl border-2 ${
-                  doshaAnswers.skinType === option 
-                    ? 'border-[#8DB600] bg-[#8DB600]/10' 
-                    : 'border-gray-200 bg-gray-50'
-                }`}
-                onPress={() => handleDoshaAnswer('skinType', option)}
-              >
-                <Text className={`font-medium text-base ${
-                  doshaAnswers.skinType === option ? 'text-[#8DB600]' : 'text-gray-600'
-                }`}>
-                  {option}
-                </Text>
-              </TouchableOpacity>
-            ))}
-          </View>
-        </View>
-        
-        <View className="bg-white p-8 rounded-3xl border border-gray-100 shadow-sm">
-          <Text className="text-gray-700 font-bold mb-6 text-lg">3. How would you describe your appetite?</Text>
-          <View className="space-y-4">
-            {['Irregular, sometimes low', 'Strong & sharp', 'Steady but slow'].map((option) => (
-              <TouchableOpacity
-                key={option}
-                className={`py-5 px-6 rounded-2xl border-2 ${
-                  doshaAnswers.appetite === option 
-                    ? 'border-[#8DB600] bg-[#8DB600]/10' 
-                    : 'border-gray-200 bg-gray-50'
-                }`}
-                onPress={() => handleDoshaAnswer('appetite', option)}
-              >
-                <Text className={`font-medium text-base ${
-                  doshaAnswers.appetite === option ? 'text-[#8DB600]' : 'text-gray-600'
-                }`}>
-                  {option}
-                </Text>
-              </TouchableOpacity>
-            ))}
-          </View>
-        </View>
-        
-        <View className="bg-white p-8 rounded-3xl border border-gray-100 shadow-sm">
-          <Text className="text-gray-700 font-bold mb-6 text-lg">4. Your energy is mostly…</Text>
-          <View className="space-y-4">
-            {['Variable, comes in bursts', 'Intense & driven', 'Stable but slow'].map((option) => (
-              <TouchableOpacity
-                key={option}
-                className={`py-5 px-6 rounded-2xl border-2 ${
-                  doshaAnswers.energy === option 
-                    ? 'border-[#8DB600] bg-[#8DB600]/10' 
-                    : 'border-gray-200 bg-gray-50'
-                }`}
-                onPress={() => handleDoshaAnswer('energy', option)}
-              >
-                <Text className={`font-medium text-base ${
-                  doshaAnswers.energy === option ? 'text-[#8DB600]' : 'text-gray-600'
-                }`}>
-                  {option}
-                </Text>
-              </TouchableOpacity>
-            ))}
-          </View>
-        </View>
-        
-        <View className="bg-white p-8 rounded-3xl border border-gray-100 shadow-sm">
-          <Text className="text-gray-700 font-bold mb-6 text-lg">5. How do you usually sleep?</Text>
-          <View className="space-y-4">
-            {['Light & easily disturbed', 'Moderate, sometimes restless', 'Deep & heavy'].map((option) => (
-              <TouchableOpacity
-                key={option}
-                className={`py-5 px-6 rounded-2xl border-2 ${
-                  doshaAnswers.sleep === option 
-                    ? 'border-[#8DB600] bg-[#8DB600]/10' 
-                    : 'border-gray-200 bg-gray-50'
-                }`}
-                onPress={() => handleDoshaAnswer('sleep', option)}
-              >
-                <Text className={`font-medium text-base ${
-                  doshaAnswers.sleep === option ? 'text-[#8DB600]' : 'text-gray-600'
-                }`}>
-                  {option}
-                </Text>
-              </TouchableOpacity>
-            ))}
-          </View>
-        </View>
-        
-        <View className="bg-white p-8 rounded-3xl border border-gray-100 shadow-sm">
-          <Text className="text-gray-700 font-bold mb-6 text-lg">6. Your common mood is…</Text>
-          <View className="space-y-4">
-            {['Anxious or restless', 'Irritable or intense', 'Calm or lazy'].map((option) => (
-              <TouchableOpacity
-                key={option}
-                className={`py-5 px-6 rounded-2xl border-2 ${
-                  doshaAnswers.mood === option 
-                    ? 'border-[#8DB600] bg-[#8DB600]/10' 
-                    : 'border-gray-200 bg-gray-50'
-                }`}
-                onPress={() => handleDoshaAnswer('mood', option)}
-              >
-                <Text className={`font-medium text-base ${
-                  doshaAnswers.mood === option ? 'text-[#8DB600]' : 'text-gray-600'
-                }`}>
-                  {option}
-                </Text>
-              </TouchableOpacity>
-            ))}
-          </View>
-        </View>
-        
-        <View className="bg-white p-8 rounded-3xl border border-gray-100 shadow-sm">
-          <Text className="text-gray-700 font-bold mb-6 text-lg">7. Which climate feels best for you?</Text>
-          <View className="space-y-4">
-            {['Warm & humid', 'Cool & fresh', 'Dry & warm'].map((option) => (
-              <TouchableOpacity
-                key={option}
-                className={`py-5 px-6 rounded-2xl border-2 ${
-                  doshaAnswers.climate === option 
-                    ? 'border-[#8DB600] bg-[#8DB600]/10' 
-                    : 'border-gray-200 bg-gray-50'
-                }`}
-                onPress={() => handleDoshaAnswer('climate', option)}
-              >
-                <Text className={`font-medium text-base ${
-                  doshaAnswers.climate === option ? 'text-[#8DB600]' : 'text-gray-600'
-                }`}>
-                  {option}
-                </Text>
-              </TouchableOpacity>
-            ))}
-          </View>
-        </View>
-        
-        <View className="bg-white p-8 rounded-3xl border border-gray-100 shadow-sm">
-          <Text className="text-gray-700 font-bold mb-6 text-lg">8. Under stress, you usually…</Text>
-          <View className="space-y-4">
-            {['Worry & overthink', 'Get angry or frustrated', 'Withdraw or comfort eat'].map((option) => (
-              <TouchableOpacity
-                key={option}
-                className={`py-5 px-6 rounded-2xl border-2 ${
-                  doshaAnswers.stressResponse === option 
-                    ? 'border-[#8DB600] bg-[#8DB600]/10' 
-                    : 'border-gray-200 bg-gray-50'
-                }`}
-                onPress={() => handleDoshaAnswer('stressResponse', option)}
-              >
-                <Text className={`font-medium text-base ${
-                  doshaAnswers.stressResponse === option ? 'text-[#8DB600]' : 'text-gray-600'
-                }`}>
-                  {option}
-                </Text>
-              </TouchableOpacity>
-            ))}
-          </View>
-        </View>
-      </View>
-    </View>
+    <DoshaAssessment 
+      doshaAnswers={doshaAnswers}
+      onAnswerChange={handleDoshaAnswer}
+    />
   );
 
   return (
