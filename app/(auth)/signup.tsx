@@ -18,12 +18,14 @@ import { useRouter } from 'expo-router';
 import { ChevronLeft, Eye, EyeOff, Camera, X, Image as ImageIcon, ChevronRight, ChevronLeft as ChevronLeftIcon } from 'lucide-react-native';
 import * as ImagePicker from 'expo-image-picker';
 import DoshaAssessment from '../../components/assessment';
+import OTPModal from '../OTPModal';
 
 const { width, height } = Dimensions.get('window');
 
 export default function SignUp() {
   const router = useRouter();
   const [currentStep, setCurrentStep] = useState(1);
+  const [showOTPModal, setShowOTPModal] = useState(false);
   
   // Form data for account creation
   const [fullName, setFullName] = useState('');
@@ -76,6 +78,28 @@ export default function SignUp() {
   };
 
   const handleNext = () => {
+    if (currentStep === 1) {
+      // Validate required fields before proceeding
+      if (!fullName || !email || !phoneNumber || !password || !confirmPassword) {
+        Alert.alert('Required Fields', 'Please fill in all required fields before proceeding');
+        return;
+      }
+      
+      if (password !== confirmPassword) {
+        Alert.alert('Password Mismatch', 'Passwords do not match. Please try again.');
+        return;
+      }
+      
+      if (!validatePassword(password)) {
+        Alert.alert('Invalid Password', 'Please ensure your password meets all requirements');
+        return;
+      }
+      
+      // Show OTP modal instead of auto-sending
+      setShowOTPModal(true);
+      return;
+    }
+    
     if (currentStep < 3) {
       setCurrentStep(currentStep + 1);
     } else {
@@ -91,6 +115,15 @@ export default function SignUp() {
       ...prev,
       [question]: answer
     }));
+  };
+
+  const handleOTPVerified = () => {
+    // This function will be called when OTP is verified
+    console.log('OTP verified successfully! Moving to Step 2...');
+    
+    // Close the OTP modal and move to Step 2 immediately
+    setShowOTPModal(false);
+    setCurrentStep(2);
   };
 
   const validatePassword = (password: string) => {
@@ -396,7 +429,7 @@ export default function SignUp() {
                 <Text
                   className={[
                     "font-medium text-base text-center transition-all duration-200",
-                    gender === option ? "text-white" : "text-gray-600"
+                    gender === option ? 'text-white' : 'text-gray-600'
                   ].join(" ")}
                 >
                   {option}
@@ -655,6 +688,15 @@ export default function SignUp() {
           </Text>
         </TouchableOpacity>
       </View>
+
+      {/* OTP Modal */}
+      <OTPModal
+        visible={showOTPModal}
+        onClose={() => setShowOTPModal(false)}
+        onContinue={handleOTPVerified}
+        email={email}
+        phoneNumber={phoneNumber}
+      />
     </SafeAreaView>
   );
 }
