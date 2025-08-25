@@ -14,6 +14,7 @@ import {
   ScrollView
 } from 'react-native';
 import { ChevronLeft, Lock } from 'lucide-react-native';
+import { supabase } from '../utils/supabase';
 
 const { width, height } = Dimensions.get('window');
 
@@ -23,18 +24,27 @@ interface OTPModalProps {
   onContinue: () => void;
   email: string;
   phoneNumber: string;
+  userId: string;
 }
 
-export default function OTPModal({ visible, onClose, onContinue, email, phoneNumber }: OTPModalProps) {
+export default function OTPModal({ visible, onClose, onContinue, email, phoneNumber, userId }: OTPModalProps) {
   const [otp, setOtp] = useState(['', '', '', '', '', '']);
   const [activeIndex, setActiveIndex] = useState(0);
   const [countdown, setCountdown] = useState(30);
   const [canResend, setCanResend] = useState(false);
+  const [isVerifying, setIsVerifying] = useState(false);
   const countdownRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
     if (visible) {
       try {
+        // Validate userId before proceeding
+        if (!userId) {
+          Alert.alert('Error', 'User ID is missing. Please try signing up again.');
+          onClose();
+          return;
+        }
+        
         // Auto-send OTP when modal opens
         sendOTP();
         startCountdown();
@@ -51,7 +61,7 @@ export default function OTPModal({ visible, onClose, onContinue, email, phoneNum
         countdownRef.current = null;
       }
     };
-  }, [visible]);
+  }, [visible, userId]);
 
   useEffect(() => {
     if (countdown > 0 && !canResend && visible) {
@@ -79,14 +89,49 @@ export default function OTPModal({ visible, onClose, onContinue, email, phoneNum
     }
   };
 
-  const sendOTP = () => {
+  const generateOTP = () => {
+    // Generate a random 6-digit OTP
+    return Math.floor(100000 + Math.random() * 900000).toString();
+  };
+
+  const sendOTP = async () => {
     try {
-      if (!email || !phoneNumber) {
-        Alert.alert('Error', 'Please fill in email and phone number first');
+      if (!email || !phoneNumber || !userId) {
+        Alert.alert('Error', 'Missing required information for OTP');
         return;
       }
-      // Here you would integrate with your OTP service
-      Alert.alert('OTP Sent', 'A 6-digit OTP has been sent to your phone and email');
+
+      const otpCode = generateOTP();
+      const expiresAt = new Date();
+      expiresAt.setMinutes(expiresAt.getMinutes() + 5); // OTP expires in 5 minutes
+
+      // Store OTP in database
+      const { error: otpError } = await supabase
+        .from('otps')
+        .insert([
+          {
+            user_id: userId,
+            otp_code: otpCode,
+            purpose: 'signup_verification',
+            is_used: false,
+            expires_at: expiresAt.toISOString()
+          }
+        ]);
+
+      if (otpError) {
+        console.error('Error storing OTP:', otpError);
+        throw new Error('Failed to generate OTP');
+      }
+
+      // In production, you would send this OTP via SMS/Email service
+      // For now, we'll show it in an alert (remove this in production)
+      Alert.alert(
+        'OTP Generated', 
+        `Your 6-digit OTP is: ${otpCode}\n\nThis OTP will expire in 5 minutes.\n\n⚠️ Remove this alert in production!`,
+        [{ text: 'OK' }]
+      );
+
+      console.log('OTP sent and stored successfully');
     } catch (error) {
       console.error('Error sending OTP:', error);
       Alert.alert('Error', 'Failed to send OTP. Please try again.');
@@ -120,32 +165,64 @@ export default function OTPModal({ visible, onClose, onContinue, email, phoneNum
 
   const verifyOTP = async () => {
     try {
+      setIsVerifying(true);
       const otpString = otp.join('');
       
-      // Accept any 6-digit OTP (for demo purposes)
-      if (otpString.length === 6) {
-        // Clear countdown immediately to prevent blocking
-        if (countdownRef.current) {
-          clearTimeout(countdownRef.current);
-          countdownRef.current = null;
-        }
-        
-        // Success - immediately redirect to Step 2
-        console.log('OTP verified successfully! Redirecting to Step 2...');
-        onContinue(); // Call onContinue immediately
-      } else {
+      if (otpString.length !== 6) {
         Alert.alert('Error', 'Please enter a valid 6-digit OTP');
+        return;
       }
+
+      // Verify OTP against database
+      const { data: otpData, error: otpError } = await supabase
+        .from('otps')
+        .select('*')
+        .eq('user_id', userId)
+        .eq('otp_code', otpString)
+        .eq('purpose', 'signup_verification')
+        .eq('is_used', false)
+        .gte('expires_at', new Date().toISOString())
+        .order('created_at', { ascending: false })
+        .limit(1)
+        .single();
+
+      if (otpError || !otpData) {
+        Alert.alert('Error', 'Invalid or expired OTP. Please try again.');
+        return;
+      }
+
+      // Mark OTP as used
+      const { error: updateError } = await supabase
+        .from('otps')
+        .update({ is_used: true })
+        .eq('id', otpData.id);
+
+      if (updateError) {
+        console.error('Error marking OTP as used:', updateError);
+        // Continue anyway as OTP was verified
+      }
+
+      // Clear countdown immediately to prevent blocking
+      if (countdownRef.current) {
+        clearTimeout(countdownRef.current);
+        countdownRef.current = null;
+      }
+      
+      // Success - immediately redirect to Step 2
+      console.log('OTP verified successfully! Redirecting to Step 2...');
+      onContinue(); // Call onContinue immediately
     } catch (error) {
       console.error('Error verifying OTP:', error);
       Alert.alert('Error', 'Failed to verify OTP. Please try again.');
+    } finally {
+      setIsVerifying(false);
     }
   };
 
-  const resendOTP = () => {
+  const resendOTP = async () => {
     try {
       if (canResend) {
-        sendOTP();
+        await sendOTP();
         startCountdown();
       }
     } catch (error) {
@@ -174,7 +251,33 @@ export default function OTPModal({ visible, onClose, onContinue, email, phoneNum
   // Auto-fill demo OTP for testing (remove this in production)
   const fillDemoOTP = () => {
     try {
-      setOtp(['1', '2', '3', '4', '5', '6']);
+      // Get the latest OTP from database for this user
+      const getLatestOTP = async () => {
+        try {
+          const { data: otpData, error: otpError } = await supabase
+            .from('otps')
+            .select('otp_code')
+            .eq('user_id', userId)
+            .eq('purpose', 'signup_verification')
+            .eq('is_used', false)
+            .gte('expires_at', new Date().toISOString())
+            .order('created_at', { ascending: false })
+            .limit(1)
+            .single();
+
+          if (otpData && !otpError) {
+            const otpDigits = otpData.otp_code.split('');
+            setOtp(otpDigits);
+          } else {
+            Alert.alert('No OTP Found', 'Please generate an OTP first by clicking "Resend it."');
+          }
+        } catch (error) {
+          console.error('Error getting latest OTP:', error);
+          Alert.alert('Error', 'Failed to get OTP. Please generate a new one.');
+        }
+      };
+
+      getLatestOTP();
     } catch (error) {
       console.error('Error filling demo OTP:', error);
     }
@@ -263,7 +366,7 @@ export default function OTPModal({ visible, onClose, onContinue, email, phoneNum
                 activeOpacity={0.8}
               >
                 <Text className="text-gray-600 text-sm text-center">
-                  Fill Demo OTP (123456)
+                  Fill Latest OTP
                 </Text>
               </TouchableOpacity>
 
@@ -284,10 +387,17 @@ export default function OTPModal({ visible, onClose, onContinue, email, phoneNum
               {/* Continue Button - Positioned above keyboard */}
               <TouchableOpacity
                 onPress={verifyOTP}
-                className="w-full bg-blue-500 py-4 rounded-lg items-center mb-8 active:bg-blue-600 active:scale-95 transition-all duration-200"
+                disabled={isVerifying}
+                className={`w-full py-4 rounded-lg items-center mb-8 transition-all duration-200 ${
+                  isVerifying 
+                    ? 'bg-gray-400' 
+                    : 'bg-blue-500 active:bg-blue-600 active:scale-95'
+                }`}
                 activeOpacity={0.9}
               >
-                <Text className="text-white font-semibold text-lg">Continue</Text>
+                <Text className="text-white font-semibold text-lg">
+                  {isVerifying ? 'Verifying...' : 'Continue'}
+                </Text>
               </TouchableOpacity>
             </View>
 

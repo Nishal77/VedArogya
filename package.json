@@ -7,16 +7,18 @@
     "android": "expo start --android",
     "ios": "expo start --ios",
     "web": "expo start --web",
-    "test": "jest --watchAll"
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "test:coverage": "jest --coverage",
+    "test:signup": "jest tests/signup.test.tsx",
+    "test:supabase": "jest tests/supabase-integration.test.ts"
   },
-  "jest": {
-    "preset": "jest-expo"
-  },
+
   "dependencies": {
     "@expo/vector-icons": "^14.1.0",
-    "@react-native-async-storage/async-storage": "^2.2.0",
-    "@react-navigation/native": "^7.1.6",
+    "@react-native-async-storage/async-storage": "^2.1.2",
     "@supabase/supabase-js": "^2.56.0",
+    "dotenv": "^17.2.1",
     "expo": "~53.0.22",
     "expo-av": "^15.1.7",
     "expo-calendar": "~14.1.4",
@@ -33,17 +35,17 @@
     "prettier-plugin-tailwindcss": "^0.5.14",
     "react": "19.0.0",
     "react-dom": "19.0.0",
-    "react-native": "0.79.6",
+    "react-native": "^0.79.5",
     "react-native-calendars": "^1.1313.0",
     "react-native-reanimated": "~3.17.4",
-    "react-native-safe-area-context": "^5.4.0",
-    "react-native-screens": "~4.11.1",
     "react-native-svg": "15.11.2",
     "react-native-url-polyfill": "^2.0.0",
     "react-native-web": "~0.20.0"
   },
   "devDependencies": {
     "@babel/core": "^7.25.2",
+    "@testing-library/jest-native": "^5.4.3",
+    "@testing-library/react-native": "^13.3.2",
     "@types/react": "~19.0.10",
     "@types/react-native": "^0.72.8",
     "autoprefixer": "^10.4.21",

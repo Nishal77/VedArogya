@@ -14,18 +14,60 @@ import {
   Alert,
   Modal
 } from 'react-native';
-import { useRouter } from 'expo-router';
-import { ChevronLeft, Eye, EyeOff, Camera, X, Image as ImageIcon, ChevronRight, ChevronLeft as ChevronLeftIcon } from 'lucide-react-native';
+import { router } from 'expo-router';
+import { ChevronLeft, Eye, EyeOff, Camera, X, Image as ImageIcon } from 'lucide-react-native';
 import * as ImagePicker from 'expo-image-picker';
-import DoshaAssessment from '../../components/assessment';
+
 import OTPModal from '../OTPModal';
+import { supabase } from '../../utils/supabase';
 
 const { width, height } = Dimensions.get('window');
 
 export default function SignUp() {
-  const router = useRouter();
+  // Navigation functions using expo-router
+  const goToLogin = () => {
+    try {
+      console.log('Navigating to login page...');
+      router.replace('/(auth)/login');
+    } catch (error) {
+      console.error('Navigation error:', error);
+      Alert.alert('Navigation Error', 'Please navigate to login manually.');
+    }
+  };
+
+  const goBack = () => {
+    try {
+      console.log('Navigating back...');
+      router.back();
+    } catch (error) {
+      console.error('Navigation error:', error);
+      Alert.alert('Navigation Error', 'Please use the back button.');
+    }
+  };
+  
   const [currentStep, setCurrentStep] = useState(1);
   const [showOTPModal, setShowOTPModal] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [userId, setUserId] = useState<string | null>(null);
+  
+  // Test Supabase connection on component mount
+  React.useEffect(() => {
+    const testConnection = async () => {
+      try {
+        console.log('Testing Supabase connection...');
+        const { data, error } = await supabase.from('users').select('count').limit(1);
+        if (error) {
+          console.warn('Supabase connection test failed:', error.message);
+        } else {
+          console.log('Supabase connection successful');
+        }
+      } catch (error) {
+        console.error('Supabase connection test error:', error);
+      }
+    };
+    
+    testConnection();
+  }, []);
   
   // Form data for account creation
   const [fullName, setFullName] = useState('');
@@ -55,33 +97,78 @@ export default function SignUp() {
   const [goal, setGoal] = useState('');
   const [profileImage, setProfileImage] = useState<string | null>(null);
 
-  // Dosha assessment answers
-  const [doshaAnswers, setDoshaAnswers] = useState({
-    bodyType: '',
-    skinType: '',
-    appetite: '',
-    energy: '',
-    sleep: '',
-    mood: '',
-    climate: '',
-    stressResponse: '',
-    digestion: '',
-    bodyTemperature: ''
-  });
+
+
+
 
   const onBack = () => {
     if (currentStep > 1) {
       setCurrentStep(currentStep - 1);
     } else {
-      router.back();
+      // Navigate back to login
+      goBack();
     }
   };
 
-  const handleNext = () => {
+  const createUserInDatabase = async () => {
+    try {
+      setIsLoading(true);
+      
+      // Create user in users table
+      const { data: userData, error: userError } = await supabase
+        .from('users')
+        .insert([
+          {
+            full_name: fullName,
+            email: email,
+            phone: phoneNumber,
+            password_hash: password, // In production, this should be hashed
+            is_verified: false
+          }
+        ])
+        .select()
+        .single();
+
+      if (userError) {
+        throw new Error(userError.message);
+      }
+
+      if (userData) {
+        setUserId(userData.id);
+        return userData.id;
+      } else {
+        throw new Error('Failed to create user');
+      }
+    } catch (error) {
+      Alert.alert('Error', 'Failed to create user account. Please try again.');
+      throw error;
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const validateEmail = (email: string) => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
+  };
+
+  const handleNext = async () => {
     if (currentStep === 1) {
       // Validate required fields before proceeding
       if (!fullName || !email || !phoneNumber || !password || !confirmPassword) {
         Alert.alert('Required Fields', 'Please fill in all required fields before proceeding');
+        return;
+      }
+      
+      // Validate email format
+      if (!validateEmail(email)) {
+        Alert.alert('Invalid Email', 'Please enter a valid email address');
+        return;
+      }
+      
+      // Validate phone number length
+      if (phoneNumber.length !== 10) {
+        Alert.alert('Invalid Phone Number', 'Please enter a valid 10-digit phone number');
         return;
       }
       
@@ -95,35 +182,236 @@ export default function SignUp() {
         return;
       }
       
-      // Show OTP modal instead of auto-sending
-      setShowOTPModal(true);
+      try {
+        const newUserId = await createUserInDatabase();
+        if (newUserId) {
+          setUserId(newUserId);
+          setShowOTPModal(true);
+        }
+      } catch (error) {
+        // Error is already handled in createUserInDatabase
+      }
+    } else if (currentStep === 2) {
+      // Step 2 now handles the complete signup process
+      await completeSignup();
       return;
     }
-    
-    if (currentStep < 3) {
-      setCurrentStep(currentStep + 1);
-    } else {
-      console.log('Signup completed:', {
-        fullName, email, phoneNumber, password, gender, dateOfBirth, weight, height, lifestyleType, goal, doshaAnswers
-      });
-      alert('Signup completed successfully!');
+  };
+
+  const completeSignup = async () => {
+    try {
+      setIsLoading(true);
+      
+      if (!userId) {
+        Alert.alert('Error', 'User ID not found. Please try signing up again.');
+        return;
+      }
+
+      // Check for existing records to prevent duplicates
+      try {
+        // Validate required fields for Step 2
+        const requiredFields = [
+          { field: gender, name: 'Gender' },
+          { field: dateOfBirth, name: 'Date of Birth' },
+          { field: weight, name: 'Weight' },
+          { field: height, name: 'Height' },
+          { field: lifestyleType, name: 'Activity Level' },
+          { field: goal, name: 'Goal' }
+        ];
+
+        const missingFields = requiredFields.filter(({ field }) => !field || !field.trim());
+        
+        // Debug logging
+        console.log('Validation Debug:', {
+          gender: gender,
+          dateOfBirth: dateOfBirth,
+          weight: weight,
+          height: height,
+          lifestyleType: lifestyleType,
+          goal: goal
+        });
+        
+        if (missingFields.length > 0) {
+          const missingFieldNames = missingFields.map(({ name }) => name).join(', ');
+          console.log('Missing fields:', missingFieldNames);
+          Alert.alert('Required Fields', `Please fill in all required fields: ${missingFieldNames}`);
+          return;
+        }
+
+        // Validate date format and convert to proper format for database
+        let formattedDateOfBirth = null;
+        try {
+          if (dateOfBirth && dateOfBirth.length === 10) {
+            const [day, month, year] = dateOfBirth.split('/');
+            const birthDate = new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
+            
+            // Check if date is valid
+            if (isNaN(birthDate.getTime())) {
+              throw new Error('Invalid date');
+            }
+            
+            // Check if date is not in the future
+            const today = new Date();
+            if (birthDate > today) {
+              Alert.alert('Invalid Date', 'Date of birth cannot be in the future.');
+              return;
+            }
+            
+            // Check if age is reasonable (between 13 and 120)
+            const age = today.getFullYear() - birthDate.getFullYear();
+            if (age < 13 || age > 120) {
+              Alert.alert('Invalid Age', 'Please enter a valid age between 13 and 120 years.');
+              return;
+            }
+            
+            formattedDateOfBirth = birthDate.toISOString().split('T')[0];
+          } else {
+            Alert.alert('Invalid Date', 'Please enter a valid date of birth in DD/MM/YYYY format.');
+            return;
+          }
+        } catch (error) {
+          Alert.alert('Invalid Date', 'Please enter a valid date of birth in DD/MM/YYYY format.');
+          return;
+        }
+
+        // Validate weight and height
+        const weightValue = parseFloat(weight);
+        const heightValue = parseFloat(height);
+        
+        if (isNaN(weightValue) || weightValue < 20 || weightValue > 300) {
+          Alert.alert('Invalid Weight', 'Please enter a valid weight between 20 and 300 kg.');
+          return;
+        }
+        
+        if (isNaN(heightValue) || heightValue < 100 || heightValue > 250) {
+          Alert.alert('Invalid Height', 'Please enter a valid height between 100 and 250 cm.');
+          return;
+        }
+
+
+
+        const { data: existingDetails, error: existingDetailsError } = await supabase
+          .from('user_details')
+          .select('id')
+          .eq('user_id', userId)
+          .single();
+        
+        if (existingDetails && !existingDetailsError) {
+          // Update existing record instead of inserting
+          const { data: updateDetails, error: updateError } = await supabase
+            .from('user_details')
+            .update({
+              gender: gender,
+              date_of_birth: formattedDateOfBirth,
+              weight: weightValue,
+              height: heightValue,
+              activity_level: lifestyleType,
+              goal: goal,
+              profile_image: profileImage
+            })
+            .eq('user_id', userId)
+            .select()
+            .single();
+          
+          if (updateError) {
+            Alert.alert('Warning', 'User details could not be updated, but account was created.');
+          }
+        } else {
+          // Insert new record
+          const { data: detailsData, error: detailsError } = await supabase
+            .from('user_details')
+            .insert([
+              {
+                user_id: userId,
+                gender: gender,
+                date_of_birth: formattedDateOfBirth,
+                weight: weightValue,
+                height: heightValue,
+                activity_level: lifestyleType,
+                goal: goal,
+                profile_image: profileImage
+              }
+            ])
+            .select()
+            .single();
+
+          if (detailsError) {
+            Alert.alert('Warning', 'User details could not be saved, but account was created.');
+          }
+        }
+      } catch (error) {
+        Alert.alert('Warning', 'User details operation failed, but account was created.');
+      }
+
+      // Verify that user details were stored successfully
+      try {
+        const { data: verifyDetails, error: verifyDetailsError } = await supabase
+          .from('user_details')
+          .select('*')
+          .eq('user_id', userId)
+          .single();
+        
+        if (verifyDetailsError || !verifyDetails) {
+          console.warn('User details verification failed:', verifyDetailsError);
+        } else {
+          console.log('User details stored successfully:', verifyDetails);
+        }
+        
+      } catch (verifyError) {
+        console.error('Verification error:', verifyError);
+      }
+
+      // Show success message before navigating
+      Alert.alert(
+        'Signup Complete! 🎉',
+        'Your account has been created successfully! You will be redirected to the login page.',
+        [
+          {
+            text: 'OK',
+            onPress: () => {
+              // Navigate to login page after successful signup
+              goToLogin();
+            }
+          }
+        ]
+      );
+    } catch (error) {
+      console.error('Error completing signup:', error);
+      Alert.alert('Error', 'Failed to complete signup. Please try again.');
+    } finally {
+      setIsLoading(false);
     }
   };
 
-  const handleDoshaAnswer = (question: string, answer: string) => {
-    setDoshaAnswers(prev => ({
-      ...prev,
-      [question]: answer
-    }));
-  };
 
-  const handleOTPVerified = () => {
-    // This function will be called when OTP is verified
-    console.log('OTP verified successfully! Moving to Step 2...');
-    
-    // Close the OTP modal and move to Step 2 immediately
-    setShowOTPModal(false);
-    setCurrentStep(2);
+
+
+
+
+
+  const handleOTPVerified = async () => {
+    try {
+      if (!userId) {
+        Alert.alert('Error', 'User ID not found. Please try signing up again.');
+        return;
+      }
+
+      // Mark user as verified in users table
+      const { error: updateError } = await supabase
+        .from('users')
+        .update({ is_verified: true })
+        .eq('id', userId);
+
+      if (updateError) {
+        Alert.alert('Warning', 'Account verification failed, but you can continue.');
+      }
+
+      // Close the OTP modal and move to Step 2 immediately
+      setShowOTPModal(false);
+      setCurrentStep(2);
+    } catch (error) {
+      Alert.alert('Error', 'Verification failed. Please try again.');
+    }
   };
 
   const validatePassword = (password: string) => {
@@ -141,6 +429,8 @@ export default function SignUp() {
     setPassword(text);
     validatePassword(text);
   };
+
+
 
   const pickImage = async () => {
     try {
@@ -401,16 +691,45 @@ export default function SignUp() {
     </View>
   );
 
-  const renderStep2 = () => (
-    <View className="flex-1">
-      <View className="mb-8">
-        <Text className="text-3xl font-bold text-gray-800 mb-1">Step 2</Text>
-        <Text className="text-lg text-gray-600 leading-6">Personal Details & Wellness Profile</Text>
-      </View>
+  const renderStep2 = () => {
+    // Calculate completion progress for Step 2
+    const requiredFields = [gender, dateOfBirth, weight, height, lifestyleType, goal];
+    const completedFields = requiredFields.filter(field => field && field.toString().trim() !== '').length;
+    const progressPercentage = (completedFields / requiredFields.length) * 100;
+    
+    return (
+      <View className="flex-1">
+        <View className="mb-8">
+          <Text className="text-3xl font-bold text-gray-800 mb-1">Step 2</Text>
+          <Text className="text-lg text-gray-600 leading-6">Personal Details & Wellness Profile</Text>
+          <Text className="text-sm text-gray-500 mt-2">
+            <Text className="text-red-500">*</Text> Required fields
+          </Text>
+          
+          {/* Progress Bar */}
+          <View className="mt-4">
+            <View className="flex-row justify-between items-center mb-2">
+              <Text className="text-sm text-gray-600">
+                Progress: {completedFields}/{requiredFields.length} fields completed
+              </Text>
+              <Text className="text-sm font-medium text-[#F4B400]">
+                {Math.round(progressPercentage)}%
+              </Text>
+            </View>
+            <View className="w-full bg-gray-200 rounded-full h-2">
+              <View 
+                className="bg-[#F4B400] h-2 rounded-full transition-all duration-300"
+                style={{ width: `${progressPercentage}%` }}
+              />
+            </View>
+          </View>
+        </View>
       
       <View className="space-y-12">
         <View className='mb-2'>
-          <Text className="text-gray-700 font-semibold mb-2 text-base">Select Your Gender</Text>
+          <Text className="text-gray-700 font-semibold mb-2 text-base">
+            Select Your Gender <Text className="text-red-500">*</Text>
+          </Text>
           <View className="flex-row">
             {['Male', 'Female', 'Prefer not to say'].map((option, idx, arr) => (
               <TouchableOpacity
@@ -440,7 +759,9 @@ export default function SignUp() {
         </View>
         
         <View className='mb-2'>
-          <Text className="text-gray-700 font-semibold mb-2 text-base">Date of Birth</Text>
+          <Text className="text-gray-700 font-semibold mb-2 text-base">
+            Date of Birth <Text className="text-red-500">*</Text>
+          </Text>
           <TextInput
             className="bg-gray-50 border border-black/30  rounded-2xl px-5 py-5 text-gray-800 text-base"
             placeholder="DD/MM/YYYY"
@@ -486,7 +807,9 @@ export default function SignUp() {
         
         <View className="flex-row mb-2">
           <View className="flex-1 mr-2">
-            <Text className="text-gray-700 font-semibold mb-2 text-base">Weight (kg)</Text>
+            <Text className="text-gray-700 font-semibold mb-2 text-base">
+              Weight (kg) <Text className="text-red-500">*</Text>
+            </Text>
             <TextInput
               className="bg-gray-50 border border-black/30  rounded-2xl px-5 py-5 text-gray-800 text-base"
               placeholder="70"
@@ -497,7 +820,9 @@ export default function SignUp() {
             />
           </View>
           <View className="flex-1">
-            <Text className="text-gray-700 font-semibold mb-2 text-base">Height (cm)</Text>
+            <Text className="text-gray-700 font-semibold mb-2 text-base">
+              Height (cm) <Text className="text-red-500">*</Text>
+            </Text>
             <TextInput
               className="bg-gray-50 border border-black/30  rounded-2xl px-5 py-5 text-gray-800 text-base"
               placeholder="170"
@@ -510,12 +835,14 @@ export default function SignUp() {
         </View>
         
         <View className='mb-2'>
-          <Text className="text-gray-700 font-semibold mb-2 text-base">How active are you daily?</Text>
+          <Text className="text-gray-700 font-semibold mb-2 text-base">
+            How active are you daily? <Text className="text-red-500">*</Text>
+          </Text>
           <View>
             {[
-              { key: 'Sedentary', label: 'Mostly sitting, little movement' },
-              { key: 'Moderate', label: 'Some walking or light exercise' },
-              { key: 'Active', label: 'Regular exercise or physically active job' }
+              { key: 'Low', label: 'Low – Little to no exercise / mostly sitting' },
+              { key: 'Moderate', label: 'Moderate – Some activity, walking or light exercise' },
+              { key: 'High', label: 'High – Regular workouts or physically demanding lifestyle' }
             ].map((option, idx, arr) => {
               const isSelected = lifestyleType === option.key;
               return (
@@ -544,14 +871,16 @@ export default function SignUp() {
         </View>
         
         <View className='mb-2'>
-          <Text className="text-gray-700 font-semibold mb-2 text-base">Goal / Focus</Text>
+          <Text className="text-gray-700 font-semibold mb-2 text-base">
+            Goal / Focus <Text className="text-red-500">*</Text>
+          </Text>
           <View className="space-y-4">
             {[
-              'Balance stress',
-              'Improve sleep', 
-              'Boost energy',
-              'Better digestion',
-              'General wellness'
+              'Digestive Issues',
+              'Stress & Anxiety',
+              'Sleep Problems',
+              'Skin & Hair Care',
+              'Chronic Pain / Joint Issues'
             ].map((option) => (
               <TouchableOpacity
                 key={option}
@@ -612,13 +941,11 @@ export default function SignUp() {
       </View>
     </View>
   );
+  };
 
-  const renderStep3 = () => (
-    <DoshaAssessment 
-      doshaAnswers={doshaAnswers}
-      onAnswerChange={handleDoshaAnswer}
-    />
-  );
+
+
+
 
   return (
     <SafeAreaView className="flex-1 bg-white">
@@ -628,6 +955,7 @@ export default function SignUp() {
         <TouchableOpacity
           onPress={onBack}
           className="bg-white rounded-full p-4 mr-5 shadow-sm border border-gray-100"
+          activeOpacity={0.7}
         >
           <ChevronLeft size={24} color="#6B7280" />
         </TouchableOpacity>
@@ -639,7 +967,7 @@ export default function SignUp() {
       
       <View className="px-6 py-6 ">
         <View className="flex-row space-x-3 mb-6 justify-center">
-          {[1, 2, 3].map((step) => (
+          {[1, 2].map((step) => (
             <View key={step} className={`w-24 h-2 rounded-full mr-2 ${
               step <= currentStep ? 'bg-[#F4B400]' : 'bg-gray-200'
             }`} />
@@ -647,10 +975,10 @@ export default function SignUp() {
         </View>
         <View className="flex-row justify-between items-center px-4">
           <Text className="text-sm text-gray-500">
-            Step {currentStep} of 3
+            Step {currentStep} of 2
           </Text>
           <Text className="text-sm font-medium text-[#F4B400]">
-            {currentStep === 1 ? 'Account Info' : currentStep === 2 ? 'Personal Details' : 'Dosha Assessment'}
+            {currentStep === 1 ? 'Account Info' : 'Personal Details'}
           </Text>
         </View>
       </View>
@@ -673,7 +1001,6 @@ export default function SignUp() {
         >
           {currentStep === 1 && renderStep1()}
           {currentStep === 2 && renderStep2()}
-          {currentStep === 3 && renderStep3()}
         </ScrollView>
       </KeyboardAvoidingView>
       
@@ -682,11 +1009,15 @@ export default function SignUp() {
           className="bg-[#F4B400] py-5 rounded-2xl items-center active:bg-[#D99900] active:scale-95 transition-all duration-200 shadow-xl"
           activeOpacity={0.8}
           onPress={handleNext}
+          disabled={isLoading}
         >
           <Text className="text-black text-xl font-bold">
-            {currentStep === 3 ? 'Complete Signup' : 'Next'}
+            {isLoading ? 'Signing Up...' : 
+             currentStep === 2 ? 'Confirm Sign Up' : 'Next'}
           </Text>
         </TouchableOpacity>
+        
+
       </View>
 
       {/* OTP Modal */}
@@ -696,6 +1027,7 @@ export default function SignUp() {
         onContinue={handleOTPVerified}
         email={email}
         phoneNumber={phoneNumber}
+        userId={userId || ''}
       />
     </SafeAreaView>
   );

@@ -40,9 +40,9 @@ export default function LandingPage() {
             <Text className="text-7xl font-bold text-white text-center drop-shadow-2xl mb-2 tracking-wide">
               VedArogya
             </Text>
-            <Text className="text-2xl text-white/95 text-center drop-shadow-lg px-8 leading-relaxed font-medium">
+            {/* <Text className="text-2xl text-white/95 text-center drop-shadow-lg px-8 leading-relaxed font-medium">
               Ancient Wisdom • Modern Healing
-            </Text>
+            </Text> */}
           </View>
           
           <View className="pb-20 px-6 items-center">
@@ -52,7 +52,7 @@ export default function LandingPage() {
               onPress={handleNavigate}
             >
               <Text className="text-black text-2xl font-bold text-center tracking-wide">
-                Get Started
+                Learn More
               </Text>
             </TouchableOpacity>
           </View>
