@@ -7,7 +7,7 @@ export default function Hero() {
   const { user } = useAuth();
 
   return (
-    <View className="bg-white px-6 pt-12 pb-8">
+    <View className="bg-white px-6 pt-16 pb-8 mt-8">
       {/* Header Section */}
       <View className="flex-row items-center justify-between mb-6">
         {/* User Greeting */}
@@ -36,7 +36,7 @@ export default function Hero() {
       </View>
 
       {/* AI Search Bar */}
-      <View className="bg-gray-50 border border-gray-200 rounded-2xl px-4 py-4 flex-row items-center shadow-sm">
+      <View className="bg-gray-50 border border-gray-200 rounded-2xl px-4 py-4 flex-row items-center">
         <Search size={20} color="#9CA3AF" className="mr-3" />
         <TextInput
           className="flex-1 text-gray-800 text-base ml-2"
