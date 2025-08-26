@@ -121,11 +121,11 @@ export default function Login() {
             </View>
 
             {/* Login Form */}
-            <View className="space-y-6">
+            <View className="space-y-8">
               
               {/* Email or Phone Input */}
               <View>
-                <Text className="text-gray-700 font-semibold mb-2 text-base">
+                <Text className="text-gray-700 font-semibold mb-3 text-base">
                   Email or Phone Number
                 </Text>
                 <View className="relative">
@@ -146,18 +146,11 @@ export default function Login() {
                     enablesReturnKeyAutomatically={true}
                   />
                 </View>
-                {/* Input type indicator */}
-                {emailOrPhone && (
-                  <Text className="text-sm text-gray-500 mt-1 ml-1">
-                    Detected as: {validateInput(emailOrPhone) === 'email' ? '📧 Email' : 
-                                  validateInput(emailOrPhone) === 'phone' ? '📱 Phone' : '❓ Invalid format'}
-                  </Text>
-                )}
               </View>
 
               {/* Password Input */}
               <View>
-                <Text className="text-gray-700 font-semibold mb-2 text-base">
+                <Text className="text-gray-700 font-semibold mb-3 text-base">
                   Password
                 </Text>
                 <View className="relative">
@@ -190,42 +183,46 @@ export default function Login() {
                 </View>
               </View>
 
+              {/* Remember Me and Forgot Password Row */}
+              <View className="flex-row items-center justify-end mb-6">
+                <TouchableOpacity>
+                  <Text className="font-medium text-base">
+                    <Text className="text-gray-500">Can’t log in?</Text>
+                    <Text> </Text>
+                    <Text className="text-black">Reset your password</Text>
+                  </Text>
+                </TouchableOpacity>
+              </View>
+
               {/* Login Button */}
               <TouchableOpacity
-                className={`py-4 rounded-2xl items-center ${
-                  loading ? 'bg-gray-400' : 'bg-green-600 active:bg-green-700 active:scale-95'
+                className={`py-5 rounded-2xl items-center ${
+                  loading ? 'bg-gray-400' : 'bg-[#F4B400] active:bg-[#D99900] active:scale-95'
                 }`}
                 activeOpacity={0.8}
                 onPress={handleLogin}
                 disabled={loading}
               >
-                <Text className="text-white font-semibold text-lg">
+                <Text className="text-black font-semibold text-lg">
                   {loading ? 'Signing In...' : 'Sign In'}
                 </Text>
               </TouchableOpacity>
 
-              {/* Forgot Password Link */}
-              <TouchableOpacity className="items-center py-2">
-                <Text className="text-green-600 font-medium text-base">
-                  Forgot Password?
-                </Text>
-              </TouchableOpacity>
-
               {/* Divider */}
-              <View className="flex-row items-center my-6">
+              <View className="flex-row items-center my-8">
                 <View className="flex-1 h-px bg-gray-300" />
-                <Text className="mx-4 text-gray-500 font-medium">or</Text>
+                <Text className="mx-6 text-gray-500 font-medium text-base">or</Text>
                 <View className="flex-1 h-px bg-gray-300" />
               </View>
 
               {/* Sign Up Link */}
               <TouchableOpacity 
-                className="items-center py-3"
+                className="items-center py-2"
                 onPress={() => router.push('/(auth)/signup')}
               >
                 <Text className="text-gray-600 text-base">
                   Don't have an account?{' '}
-                  <Text className="text-green-600 font-semibold">Sign Up</Text>
+                  <Text className="text-black font-semibold">Sign Up</Text>
                 </Text>
               </TouchableOpacity>
             </View>

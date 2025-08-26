@@ -2,7 +2,8 @@ import React from 'react';
 import { View, Text, TouchableOpacity, Alert, ScrollView } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useAuth } from '../../../utils/AuthContext';
-import { User, Settings, LogOut, Heart } from 'lucide-react-native';
+import { Settings, LogOut, Heart } from 'lucide-react-native';
+import ProfileIcon from '../../../components/ProfileIcon';
 
 export default function ProfileScreen() {
   const { user, signOut } = useAuth();
@@ -27,12 +28,12 @@ export default function ProfileScreen() {
 
   return (
     <SafeAreaView className="flex-1 bg-white">
-      <ScrollView className="flex-1 px-5">
+      <ScrollView className="flex-1 px-5" contentContainerStyle={{ paddingBottom: 80 }}>
         <View className="py-6">
           {/* Header */}
           <View className="items-center mb-8">
             <View className="w-20 h-20 bg-yellow-100 rounded-full items-center justify-center mb-4">
-              <User size={32} color="#F4B400" />
+              <ProfileIcon size={32} color="#F4B400" />
             </View>
             <Text className="text-2xl font-bold text-gray-900 mb-2">Profile</Text>
             <Text className="text-gray-600 text-center">Your wellness profile</Text>
@@ -42,7 +43,7 @@ export default function ProfileScreen() {
           {user && (
             <View className="bg-gray-50 rounded-xl p-6 mb-6">
               <View className="flex-row items-center mb-4">
-                <User size={20} color="#6B7280" />
+                <ProfileIcon size={20} color="#6B7280" />
                 <Text className="text-gray-500 ml-2 font-medium">Account Info</Text>
               </View>
               <Text className="text-sm text-gray-500 mb-1">Email</Text>

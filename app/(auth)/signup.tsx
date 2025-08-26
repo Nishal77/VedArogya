@@ -27,23 +27,19 @@ const { width, height } = Dimensions.get('window');
 
 export default function SignUp() {
   const { signUp } = useAuth();
-  // Navigation functions using expo-router
+  
   const goToLogin = () => {
     try {
-      console.log('Navigating to login page...');
       router.replace('/(auth)/login');
     } catch (error) {
-      console.error('Navigation error:', error);
       Alert.alert('Navigation Error', 'Please navigate to login manually.');
     }
   };
 
   const goBack = () => {
     try {
-      console.log('Navigating back...');
       router.back();
     } catch (error) {
-      console.error('Navigation error:', error);
       Alert.alert('Navigation Error', 'Please use the back button.');
     }
   };
@@ -52,25 +48,6 @@ export default function SignUp() {
   const [showOTPModal, setShowOTPModal] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [userId, setUserId] = useState<string | null>(null);
-  
-  // Test Supabase connection on component mount
-  React.useEffect(() => {
-    const testConnection = async () => {
-      try {
-        console.log('Testing Supabase connection...');
-        const { data, error } = await supabase.from('users').select('count').limit(1);
-        if (error) {
-          console.warn('Supabase connection test failed:', error.message);
-        } else {
-          console.log('Supabase connection successful');
-        }
-      } catch (error) {
-        console.error('Supabase connection test error:', error);
-      }
-    };
-    
-    testConnection();
-  }, []);
   
   // Form data for account creation
   const [fullName, setFullName] = useState('');
@@ -100,15 +77,10 @@ export default function SignUp() {
   const [goal, setGoal] = useState('');
   const [profileImage, setProfileImage] = useState<string | null>(null);
 
-
-
-
-
   const onBack = () => {
     if (currentStep > 1) {
       setCurrentStep(currentStep - 1);
     } else {
-      // Navigate back to login
       goBack();
     }
   };
@@ -117,14 +89,6 @@ export default function SignUp() {
     try {
       setIsLoading(true);
       
-      console.log('Creating user account with:', { 
-        email, 
-        fullName: fullName, 
-        phoneNumber,
-        password: password ? `${password.substring(0, 3)}***` : 'UNDEFINED'
-      });
-      
-      // Use Supabase Auth to create the user account
       const { error, user: createdUser } = await signUp(email, password, fullName, phoneNumber);
       
       if (error) {
@@ -136,8 +100,6 @@ export default function SignUp() {
         Alert.alert('Error', 'User account created but user data is missing. Please try again.');
         throw new Error('User data missing after signup');
       }
-
-      console.log('User account created successfully:', createdUser);
       
       // Wait a moment for the database trigger to create the user profile
       await new Promise(resolve => setTimeout(resolve, 1000));
@@ -150,8 +112,6 @@ export default function SignUp() {
         .single();
       
       if (profileError || !userProfile) {
-        console.warn('User profile not found, creating manually...');
-        
         // Create the profile directly in the users table
         const { error: insertError } = await supabase
           .from('users')
@@ -166,21 +126,14 @@ export default function SignUp() {
           ]);
         
         if (insertError) {
-          console.error('Failed to create user profile:', insertError);
           Alert.alert('Warning', 'Account created but profile setup incomplete. Please contact support.');
           throw new Error('Profile creation failed');
         }
-        
-        console.log('User profile created manually');
-      } else {
-        console.log('User profile found in database:', userProfile);
       }
       
-      // Store the user ID from Supabase Auth
       setUserId(createdUser.id);
       return createdUser.id;
     } catch (error) {
-      console.error('Error in createUserInDatabase:', error);
       Alert.alert('Error', 'Failed to create user account. Please try again.');
       throw error;
     } finally {
@@ -195,16 +148,6 @@ export default function SignUp() {
 
   const handleNext = async () => {
     if (currentStep === 1) {
-      console.log('Step 1 validation - checking fields:', {
-        fullName: fullName ? 'SET' : 'MISSING',
-        email: email ? 'SET' : 'MISSING',
-        phoneNumber: phoneNumber ? 'SET' : 'MISSING',
-        password: password ? 'SET' : 'MISSING',
-        confirmPassword: confirmPassword ? 'SET' : 'MISSING',
-        passwordValue: password ? `${password.substring(0, 3)}***` : 'UNDEFINED',
-        passwordType: typeof password
-      });
-      
       // Validate required fields before proceeding
       if (!fullName || !email || !phoneNumber || !password || !confirmPassword) {
         Alert.alert('Required Fields', 'Please fill in all required fields before proceeding');
@@ -243,7 +186,6 @@ export default function SignUp() {
         // Error is already handled in createUserInDatabase
       }
     } else if (currentStep === 2) {
-      // Step 2 now handles the complete signup process
       await completeSignup();
       return;
     }
@@ -258,10 +200,8 @@ export default function SignUp() {
         return;
       }
 
-      // Initialize actualUserId
       let actualUserId = userId;
 
-      // Check for existing records to prevent duplicates
       try {
         // Validate required fields for Step 2
         const requiredFields = [
@@ -275,19 +215,8 @@ export default function SignUp() {
 
         const missingFields = requiredFields.filter(({ field }) => !field || !field.trim());
         
-        // Debug logging
-        console.log('Validation Debug:', {
-          gender: gender,
-          dateOfBirth: dateOfBirth,
-          weight: weight,
-          height: height,
-          lifestyleType: lifestyleType,
-          goal: goal
-        });
-        
         if (missingFields.length > 0) {
           const missingFieldNames = missingFields.map(({ name }) => name).join(', ');
-          console.log('Missing fields:', missingFieldNames);
           Alert.alert('Required Fields', `Please fill in all required fields: ${missingFieldNames}`);
           return;
         }
@@ -342,8 +271,6 @@ export default function SignUp() {
           return;
         }
 
-
-
         const { data: existingDetails, error: existingDetailsError } = await supabase
           .from('user_details')
           .select('id')
@@ -352,7 +279,7 @@ export default function SignUp() {
         
         if (existingDetails && !existingDetailsError) {
           // Update existing record instead of inserting
-          const { data: updateDetails, error: updateError } = await supabase
+          const { error: updateError } = await supabase
             .from('user_details')
             .update({
               gender: gender,
@@ -363,16 +290,14 @@ export default function SignUp() {
               goal: goal,
               profile_image: profileImage
             })
-            .eq('user_id', actualUserId)
-            .select()
-            .single();
+            .eq('user_id', actualUserId);
           
           if (updateError) {
             Alert.alert('Warning', 'User details could not be updated, but account was created.');
           }
         } else {
           // Insert new record
-          const { data: detailsData, error: detailsError } = await supabase
+          const { error: detailsError } = await supabase
             .from('user_details')
             .insert([
               {
@@ -385,9 +310,7 @@ export default function SignUp() {
                 goal: goal,
                 profile_image: profileImage
               }
-            ])
-            .select()
-            .single();
+            ]);
 
           if (detailsError) {
             Alert.alert('Warning', 'User details could not be saved, but account was created.');
@@ -397,51 +320,25 @@ export default function SignUp() {
         Alert.alert('Warning', 'User details operation failed, but account was created.');
       }
 
-      // Verify that user details were stored successfully
-      try {
-        const { data: verifyDetails, error: verifyDetailsError } = await supabase
-          .from('user_details')
-          .select('*')
-          .eq('user_id', actualUserId)
-          .single();
-        
-        if (verifyDetailsError || !verifyDetails) {
-          console.warn('User details verification failed:', verifyDetailsError);
-        } else {
-          console.log('User details stored successfully:', verifyDetails);
-        }
-        
-      } catch (verifyError) {
-        console.error('Verification error:', verifyError);
-      }
-
       // Show success message before navigating
       Alert.alert(
-        'Signup Complete! 🎉',
+        'Signup Complete!',
         'Your account has been created successfully! You will be redirected to the home page.',
         [
           {
             text: 'OK',
             onPress: () => {
-              // Navigate to home page after successful signup
               router.replace('/(tabs)/home');
             }
           }
         ]
       );
     } catch (error) {
-      console.error('Error completing signup:', error);
       Alert.alert('Error', 'Failed to complete signup. Please try again.');
     } finally {
       setIsLoading(false);
     }
   };
-
-
-
-
-
-
 
   const handleOTPVerified = async () => {
     try {
@@ -457,10 +354,7 @@ export default function SignUp() {
         .eq('id', userId);
 
       if (updateError) {
-        console.error('Error updating user verification:', updateError);
         Alert.alert('Warning', 'Account verification failed, but you can continue.');
-      } else {
-        console.log('User verified successfully');
       }
 
       // Close the OTP modal and move to Step 2 immediately
@@ -491,8 +385,6 @@ export default function SignUp() {
     validatePassword(text);
   };
 
-
-
   const pickImage = async () => {
     try {
       // Request permissions
@@ -519,7 +411,6 @@ export default function SignUp() {
         setProfileImage(result.assets[0].uri);
       }
     } catch (error) {
-      console.error('Error picking image:', error);
       Alert.alert('Error', 'Failed to pick image. Please try again.');
     }
   };
@@ -548,7 +439,6 @@ export default function SignUp() {
         setProfileImage(result.assets[0].uri);
       }
     } catch (error) {
-      console.error('Error taking photo:', error);
       Alert.alert('Error', 'Failed to take photo. Please try again.');
     }
   };
@@ -729,7 +619,7 @@ export default function SignUp() {
           <Text className="text-gray-700 font-semibold mb-2 text-base">Confirm Password</Text>
           <View className="flex-row items-center">
             <TextInput
-              className="flex-1 bg-gray-50 border border-black/30  border-r-0 rounded-l-2xl px-5 py-5 text-gray-800 text-base"
+              className="flex-1 bg-gray-50 border border-black/30  border-r-0 rounded-2xl px-5 py-5 text-gray-800 text-base"
               placeholder="Confirm your password"
               placeholderTextColor="#9CA3AF"
               value={confirmPassword}
@@ -1020,10 +910,6 @@ export default function SignUp() {
   );
   };
 
-
-
-
-
   return (
     <SafeAreaView className="flex-1 bg-white">
       <StatusBar barStyle="dark-content" backgroundColor="#ffffff" />
@@ -1097,7 +983,7 @@ export default function SignUp() {
         {/* Login Info Note */}
         <View className="items-center mt-4">
           <Text className="text-gray-500 text-sm text-center">
-            💡 After signup, you can login with either your email or phone number
+            After signup, you can login with either your email or phone number
           </Text>
         </View>
       </View>
