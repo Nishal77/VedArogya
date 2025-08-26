@@ -18,14 +18,18 @@ export default {
     ],
     ios: {
       supportsTablet: true,
-      bundleIdentifier: "com.vedarogya.app"
+      bundleIdentifier: "com.vedarogya.app",
+      // iOS keyboard handling
+      keyboardDisplayRequiresUserAction: false
     },
     android: {
       adaptiveIcon: {
         foregroundImage: "./assets/adaptive-icon.png",
         backgroundColor: "#ffffff"
       },
-      package: "com.vedarogya.app"
+      package: "com.vedarogya.app",
+      // Android keyboard handling
+      softwareKeyboardLayoutMode: "pan"
     },
     web: {
       favicon: "./assets/favicon.png",

@@ -6,188 +6,232 @@ import {
   TouchableOpacity,
   SafeAreaView,
   StatusBar,
-  Image
+  Image,
+  Alert,
+  KeyboardAvoidingView,
+  ScrollView,
+  Platform
 } from 'react-native';
 import { useRouter } from 'expo-router';
-import { Mail, Lock, Eye, EyeOff } from 'lucide-react-native';
+import { Mail, Lock, Eye, EyeOff, Phone } from 'lucide-react-native';
+import { useAuth } from '../../utils/AuthContext';
 
 export default function Login() {
   const router = useRouter();
-  const [email, setEmail] = useState('');
+  const { signIn } = useAuth();
+  const [emailOrPhone, setEmailOrPhone] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
+  const [loading, setLoading] = useState(false);
 
-  const handleLogin = () => {
-    // Handle login logic here
-    console.log('Login with email:', email, 'and password');
-    // router.push('/dashboard');
+  const handleLogin = async () => {
+    if (!emailOrPhone || !password) {
+      Alert.alert('Error', 'Please fill in all fields');
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const { error } = await signIn(emailOrPhone, password);
+      
+      if (error) {
+        Alert.alert('Login Failed', error.message || 'Invalid credentials. Please try again.');
+      } else {
+        // Success - AuthWrapper will handle navigation to home page
+        console.log('Login successful, redirecting to home...');
+        // Show success message briefly before redirect
+        Alert.alert(
+          'Login Successful! 🎉',
+          'Welcome back to VedArogya!',
+          [{ text: 'OK' }]
+        );
+      }
+    } catch (error) {
+      console.error('Login error:', error);
+      Alert.alert('Error', 'An unexpected error occurred. Please try again.');
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const handleSignUp = () => {
-    router.push('/(auth)/signup');
+  const validateInput = (input: string) => {
+    // Check if input looks like an email
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (emailRegex.test(input)) {
+      return 'email';
+    }
+    // Check if input looks like a phone number (10 digits)
+    const phoneRegex = /^\d{10}$/;
+    if (phoneRegex.test(input)) {
+      return 'phone';
+    }
+    return 'invalid';
   };
 
-  const handleAppleLogin = () => {
-    console.log('Apple login pressed');
-    // Implement Apple login
+  const getInputIcon = () => {
+    const inputType = validateInput(emailOrPhone);
+    if (inputType === 'email') {
+      return <Mail size={20} color="#9CA3AF" />;
+    } else if (inputType === 'phone') {
+      return <Phone size={20} color="#9CA3AF" />;
+    }
+    return <Mail size={20} color="#9CA3AF" />;
   };
 
-  const handleGoogleLogin = () => {
-    console.log('Google login pressed');
-    // Implement Google login
-  };
-
-  const handleTerms = () => {
-    console.log('Terms of Service pressed');
-    // Navigate to terms
-  };
-
-  const handlePrivacy = () => {
-    console.log('Privacy Policy pressed');
-    // Navigate to privacy policy
+  const getInputPlaceholder = () => {
+    const inputType = validateInput(emailOrPhone);
+    if (inputType === 'email') {
+      return 'Enter your email address';
+    } else if (inputType === 'phone') {
+      return 'Enter your phone number';
+    }
+    return 'Enter your email or phone number';
   };
 
   return (
     <SafeAreaView className="flex-1 bg-white">
       <StatusBar barStyle="dark-content" backgroundColor="#ffffff" />
       
-      {/* Main Content */}
-      <View className="flex-1 px-8 justify-center">
-        {/* Top Section - Header/Branding */}
-        <View className="items-center mb-12">
-          {/* Icon */}
-          <Image 
-            source={require('../../assets/images/ayurvedic.png')}
-            className="w-16 h-16 mb-6"
-            resizeMode="contain"
-          />
-          
-          {/* Welcome Text */}
-          <Text className="text-3xl font-bold text-gray-900 text-center mb-2">
-            Welcome to VedArogya
-          </Text>
-          
-          {/* Sign Up Link */}
-          <View className="flex-row items-center">
-            <Text className="text-gray-600 text-base">
-              Don't have an account?{' '}
-            </Text>
-            <TouchableOpacity onPress={handleSignUp}>
-              <Text className="text-gray-900 font-semibold text-base underline">
-                Sign up
+      <KeyboardAvoidingView
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        className="flex-1"
+      >
+        <ScrollView
+          className="flex-1"
+          contentContainerStyle={{ flexGrow: 1 }}
+          keyboardShouldPersistTaps="handled"
+          showsVerticalScrollIndicator={false}
+        >
+          {/* Main Content */}
+          <View className="flex-1 px-8 justify-center py-8">
+            
+            {/* Header */}
+            <View className="items-center mb-12">
+              <Image
+                source={require('../../assets/images/ayurvedic.png')}
+                className="w-24 h-24 mb-4"
+                resizeMode="contain"
+              />
+              <Text className="text-3xl font-bold text-gray-800 mb-2">
+                Welcome Back
               </Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-
-        {/* Login Form Section */}
-        <View className="mb-8">
-          {/* Email Input */}
-          <View className="mb-3">
-            <Text className="text-gray-900 font-medium text-base mb-2">Email</Text>
-            <View className="relative">
-              <TextInput
-                className="bg-white border border-gray-300 rounded-xl px-12 py-4 text-gray-900 text-base"
-                placeholder="m@example.com"
-                placeholderTextColor="#9CA3AF"
-                value={email}
-                onChangeText={setEmail}
-                keyboardType="email-address"
-                autoCapitalize="none"
-              />
-              <View className="absolute left-4 top-4">
-                <Mail size={20} color="#9CA3AF" />
-              </View>
+              <Text className="text-gray-600 text-center text-base">
+                Sign in to continue your wellness journey
+              </Text>
             </View>
-          </View>
-          
-          {/* Password Input */}
-          <View className="mb-6">
-            <Text className="text-gray-900 font-medium text-base mb-2">Password</Text>
-            <View className="relative">
-              <TextInput
-                className="bg-white border border-gray-300 rounded-xl px-12 py-4 text-gray-900 text-base"
-                placeholder="Enter your password"
-                placeholderTextColor="#9CA3AF"
-                value={password}
-                onChangeText={setPassword}
-                secureTextEntry={!showPassword}
-                autoCapitalize="none"
-              />
-              <View className="absolute left-4 top-4">
-                <Lock size={20} color="#9CA3AF" />
-              </View>
-              <TouchableOpacity 
-                className="absolute right-4 top-4"
-                onPress={() => setShowPassword(!showPassword)}
-              >
-                {showPassword ? (
-                  <EyeOff size={20} color="#9CA3AF" />
-                ) : (
-                  <Eye size={20} color="#9CA3AF" />
+
+            {/* Login Form */}
+            <View className="space-y-6">
+              
+              {/* Email or Phone Input */}
+              <View>
+                <Text className="text-gray-700 font-semibold mb-2 text-base">
+                  Email or Phone Number
+                </Text>
+                <View className="relative">
+                  <View className="absolute left-4 top-1/2 transform -translate-y-1/2 z-10">
+                    {getInputIcon()}
+                  </View>
+                  <TextInput
+                    className="bg-gray-50 border border-black/30 rounded-2xl px-12 py-5 text-gray-800 text-base"
+                    placeholder={getInputPlaceholder()}
+                    placeholderTextColor="#9CA3AF"
+                    value={emailOrPhone}
+                    onChangeText={setEmailOrPhone}
+                    keyboardType="email-address"
+                    autoCapitalize="none"
+                    autoCorrect={false}
+                    returnKeyType="next"
+                    blurOnSubmit={false}
+                    enablesReturnKeyAutomatically={true}
+                  />
+                </View>
+                {/* Input type indicator */}
+                {emailOrPhone && (
+                  <Text className="text-sm text-gray-500 mt-1 ml-1">
+                    Detected as: {validateInput(emailOrPhone) === 'email' ? '📧 Email' : 
+                                  validateInput(emailOrPhone) === 'phone' ? '📱 Phone' : '❓ Invalid format'}
+                  </Text>
                 )}
+              </View>
+
+              {/* Password Input */}
+              <View>
+                <Text className="text-gray-700 font-semibold mb-2 text-base">
+                  Password
+                </Text>
+                <View className="relative">
+                  <View className="absolute left-4 top-1/2 transform -translate-y-1/2 z-10">
+                    <Lock size={20} color="#9CA3AF" />
+                  </View>
+                  <TextInput
+                    className="bg-gray-50 border border-black/30 rounded-2xl px-12 py-5 text-gray-800 text-base"
+                    placeholder="Enter your password"
+                    placeholderTextColor="#9CA3AF"
+                    value={password}
+                    onChangeText={setPassword}
+                    secureTextEntry={!showPassword}
+                    autoCapitalize="none"
+                    autoCorrect={false}
+                    returnKeyType="done"
+                    blurOnSubmit={true}
+                    enablesReturnKeyAutomatically={true}
+                  />
+                  <TouchableOpacity
+                    className="absolute right-4 top-1/2 transform -translate-y-1/2"
+                    onPress={() => setShowPassword(!showPassword)}
+                  >
+                    {showPassword ? (
+                      <EyeOff size={20} color="#9CA3AF" />
+                    ) : (
+                      <Eye size={20} color="#9CA3AF" />
+                    )}
+                  </TouchableOpacity>
+                </View>
+              </View>
+
+              {/* Login Button */}
+              <TouchableOpacity
+                className={`py-4 rounded-2xl items-center ${
+                  loading ? 'bg-gray-400' : 'bg-green-600 active:bg-green-700 active:scale-95'
+                }`}
+                activeOpacity={0.8}
+                onPress={handleLogin}
+                disabled={loading}
+              >
+                <Text className="text-white font-semibold text-lg">
+                  {loading ? 'Signing In...' : 'Sign In'}
+                </Text>
+              </TouchableOpacity>
+
+              {/* Forgot Password Link */}
+              <TouchableOpacity className="items-center py-2">
+                <Text className="text-green-600 font-medium text-base">
+                  Forgot Password?
+                </Text>
+              </TouchableOpacity>
+
+              {/* Divider */}
+              <View className="flex-row items-center my-6">
+                <View className="flex-1 h-px bg-gray-300" />
+                <Text className="mx-4 text-gray-500 font-medium">or</Text>
+                <View className="flex-1 h-px bg-gray-300" />
+              </View>
+
+              {/* Sign Up Link */}
+              <TouchableOpacity 
+                className="items-center py-3"
+                onPress={() => router.push('/(auth)/signup')}
+              >
+                <Text className="text-gray-600 text-base">
+                  Don't have an account?{' '}
+                  <Text className="text-green-600 font-semibold">Sign Up</Text>
+                </Text>
               </TouchableOpacity>
             </View>
           </View>
-          
-          {/* Login Button */}
-          <TouchableOpacity
-            className="bg-[#F4B400] py-4 rounded-xl items-center active:bg-gray-800 active:scale-95 transition-all duration-200"
-            activeOpacity={0.8}
-            onPress={handleLogin}
-          >
-            <Text className="text-black font-bold text-base">
-              Login
-            </Text>
-          </TouchableOpacity>
-        </View>
-
-        {/* Separator */}
-        <View className="flex-row items-center mb-8">
-          <View className="flex-1 h-px bg-gray-300" />
-          <Text className="mx-4 text-gray-600 font-medium">Or</Text>
-          <View className="flex-1 h-px bg-gray-300" />
-        </View>
-
-        {/* Social Login Options */}
-        <View className="mb-8">
-          {/* Google Login */}
-          <TouchableOpacity
-            className="bg-white border border-gray-300 py-4 rounded-xl items-center flex-row justify-center active:bg-gray-50 active:scale-95 transition-all duration-200"
-            activeOpacity={0.8}
-            onPress={handleGoogleLogin}
-          >
-            <Image 
-              source={require('../../assets/images/icons8-google-24.png')}
-              className="w-6 h-6 mr-3"
-              resizeMode="contain"
-            />
-            <Text className="text-gray-900 font-medium text-base">
-              Continue with Google
-            </Text>
-          </TouchableOpacity>
-        </View>
-
-        {/* Footer - Legal Text */}
-        <View className="items-center">
-          <View className="flex-row flex-wrap justify-center">
-            <Text className="text-gray-500 text-sm text-center">
-              By clicking continue, you agree to our{' '}
-            </Text>
-            <TouchableOpacity onPress={handleTerms}>
-              <Text className="text-gray-500 text-sm underline">
-                Terms of Service
-              </Text>
-            </TouchableOpacity>
-            <Text className="text-gray-500 text-sm"> and </Text>
-            <TouchableOpacity onPress={handlePrivacy}>
-              <Text className="text-gray-500 text-sm underline">
-                Privacy Policy
-              </Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-      </View>
+        </ScrollView>
+      </KeyboardAvoidingView>
     </SafeAreaView>
   );
 }

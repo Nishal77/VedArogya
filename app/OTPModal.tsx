@@ -101,6 +101,19 @@ export default function OTPModal({ visible, onClose, onContinue, email, phoneNum
         return;
       }
 
+      // First, verify that the user profile exists in our users table
+      const { data: userProfile, error: userError } = await supabase
+        .from('users')
+        .select('id')
+        .eq('id', userId)
+        .single();
+
+      if (userError || !userProfile) {
+        console.error('User profile not found:', userError);
+        Alert.alert('Error', 'User profile not found. Please try signing up again.');
+        return;
+      }
+
       const otpCode = generateOTP();
       const expiresAt = new Date();
       expiresAt.setMinutes(expiresAt.getMinutes() + 5); // OTP expires in 5 minutes

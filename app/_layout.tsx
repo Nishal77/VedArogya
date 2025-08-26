@@ -3,6 +3,8 @@ import "../global.css";
 import { useEffect } from "react";
 import { LogBox } from "react-native";
 import { testSupabaseConnection } from "../utils/supabase";
+import { AuthProvider } from "../utils/AuthContext";
+import AuthWrapper from "../components/AuthWrapper";
 
 // Ignore specific warnings that are not critical
 LogBox.ignoreLogs([
@@ -26,11 +28,16 @@ export default function RootLayout() {
   }, []);
 
   return (
-    <Stack screenOptions={{ headerShown: false }}>
-      <Stack.Screen name="index" />
-      <Stack.Screen name="landing" />
-      <Stack.Screen name="about" />
-      <Stack.Screen name="(auth)" />
-    </Stack>
+    <AuthProvider>
+      <AuthWrapper>
+        <Stack screenOptions={{ headerShown: false }}>
+          <Stack.Screen name="index" options={{ title: 'Home' }} />
+          <Stack.Screen name="landing" options={{ title: 'Landing' }} />
+          <Stack.Screen name="about" options={{ title: 'About' }} />
+          <Stack.Screen name="(auth)" options={{ title: 'Authentication' }} />
+          <Stack.Screen name="(tabs)" options={{ title: 'Main App' }} />
+        </Stack>
+      </AuthWrapper>
+    </AuthProvider>
   );
 }

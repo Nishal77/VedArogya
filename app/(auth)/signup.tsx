@@ -20,10 +20,13 @@ import * as ImagePicker from 'expo-image-picker';
 
 import OTPModal from '../OTPModal';
 import { supabase } from '../../utils/supabase';
+import { useAuth } from '../../utils/AuthContext';
+import { validatePassword as validatePasswordHelper } from '../../utils/helpers';
 
 const { width, height } = Dimensions.get('window');
 
 export default function SignUp() {
+  const { signUp } = useAuth();
   // Navigation functions using expo-router
   const goToLogin = () => {
     try {
@@ -84,8 +87,8 @@ export default function SignUp() {
   const [passwordValidation, setPasswordValidation] = useState({
     length: false,
     hasNumber: false,
-    hasSpecial: false,
-    hasAlphabet: false
+    hasUppercase: false,
+    hasLowercase: false
   });
 
   // Form data for personal details
@@ -114,32 +117,70 @@ export default function SignUp() {
     try {
       setIsLoading(true);
       
-      // Create user in users table
-      const { data: userData, error: userError } = await supabase
+      console.log('Creating user account with:', { 
+        email, 
+        fullName: fullName, 
+        phoneNumber,
+        password: password ? `${password.substring(0, 3)}***` : 'UNDEFINED'
+      });
+      
+      // Use Supabase Auth to create the user account
+      const { error, user: createdUser } = await signUp(email, password, fullName, phoneNumber);
+      
+      if (error) {
+        Alert.alert('Error', error.message || 'Failed to create user account. Please try again.');
+        throw error;
+      }
+
+      if (!createdUser) {
+        Alert.alert('Error', 'User account created but user data is missing. Please try again.');
+        throw new Error('User data missing after signup');
+      }
+
+      console.log('User account created successfully:', createdUser);
+      
+      // Wait a moment for the database trigger to create the user profile
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
+      // Verify that the user profile was created in our users table
+      const { data: userProfile, error: profileError } = await supabase
         .from('users')
-        .insert([
-          {
-            full_name: fullName,
-            email: email,
-            phone: phoneNumber,
-            password_hash: password, // In production, this should be hashed
-            is_verified: false
-          }
-        ])
-        .select()
+        .select('id, email, full_name, phone, is_verified')
+        .eq('id', createdUser.id)
         .single();
-
-      if (userError) {
-        throw new Error(userError.message);
-      }
-
-      if (userData) {
-        setUserId(userData.id);
-        return userData.id;
+      
+      if (profileError || !userProfile) {
+        console.warn('User profile not found, creating manually...');
+        
+        // Create the profile directly in the users table
+        const { error: insertError } = await supabase
+          .from('users')
+          .insert([
+            {
+              id: createdUser.id,
+              email: email,
+              full_name: fullName,
+              phone: phoneNumber,
+              is_verified: false
+            }
+          ]);
+        
+        if (insertError) {
+          console.error('Failed to create user profile:', insertError);
+          Alert.alert('Warning', 'Account created but profile setup incomplete. Please contact support.');
+          throw new Error('Profile creation failed');
+        }
+        
+        console.log('User profile created manually');
       } else {
-        throw new Error('Failed to create user');
+        console.log('User profile found in database:', userProfile);
       }
+      
+      // Store the user ID from Supabase Auth
+      setUserId(createdUser.id);
+      return createdUser.id;
     } catch (error) {
+      console.error('Error in createUserInDatabase:', error);
       Alert.alert('Error', 'Failed to create user account. Please try again.');
       throw error;
     } finally {
@@ -154,6 +195,16 @@ export default function SignUp() {
 
   const handleNext = async () => {
     if (currentStep === 1) {
+      console.log('Step 1 validation - checking fields:', {
+        fullName: fullName ? 'SET' : 'MISSING',
+        email: email ? 'SET' : 'MISSING',
+        phoneNumber: phoneNumber ? 'SET' : 'MISSING',
+        password: password ? 'SET' : 'MISSING',
+        confirmPassword: confirmPassword ? 'SET' : 'MISSING',
+        passwordValue: password ? `${password.substring(0, 3)}***` : 'UNDEFINED',
+        passwordType: typeof password
+      });
+      
       // Validate required fields before proceeding
       if (!fullName || !email || !phoneNumber || !password || !confirmPassword) {
         Alert.alert('Required Fields', 'Please fill in all required fields before proceeding');
@@ -206,6 +257,9 @@ export default function SignUp() {
         Alert.alert('Error', 'User ID not found. Please try signing up again.');
         return;
       }
+
+      // Initialize actualUserId
+      let actualUserId = userId;
 
       // Check for existing records to prevent duplicates
       try {
@@ -293,7 +347,7 @@ export default function SignUp() {
         const { data: existingDetails, error: existingDetailsError } = await supabase
           .from('user_details')
           .select('id')
-          .eq('user_id', userId)
+          .eq('user_id', actualUserId)
           .single();
         
         if (existingDetails && !existingDetailsError) {
@@ -309,7 +363,7 @@ export default function SignUp() {
               goal: goal,
               profile_image: profileImage
             })
-            .eq('user_id', userId)
+            .eq('user_id', actualUserId)
             .select()
             .single();
           
@@ -322,7 +376,7 @@ export default function SignUp() {
             .from('user_details')
             .insert([
               {
-                user_id: userId,
+                user_id: actualUserId,
                 gender: gender,
                 date_of_birth: formattedDateOfBirth,
                 weight: weightValue,
@@ -348,7 +402,7 @@ export default function SignUp() {
         const { data: verifyDetails, error: verifyDetailsError } = await supabase
           .from('user_details')
           .select('*')
-          .eq('user_id', userId)
+          .eq('user_id', actualUserId)
           .single();
         
         if (verifyDetailsError || !verifyDetails) {
@@ -364,13 +418,13 @@ export default function SignUp() {
       // Show success message before navigating
       Alert.alert(
         'Signup Complete! 🎉',
-        'Your account has been created successfully! You will be redirected to the login page.',
+        'Your account has been created successfully! You will be redirected to the home page.',
         [
           {
             text: 'OK',
             onPress: () => {
-              // Navigate to login page after successful signup
-              goToLogin();
+              // Navigate to home page after successful signup
+              router.replace('/(tabs)/home');
             }
           }
         ]
@@ -403,7 +457,10 @@ export default function SignUp() {
         .eq('id', userId);
 
       if (updateError) {
+        console.error('Error updating user verification:', updateError);
         Alert.alert('Warning', 'Account verification failed, but you can continue.');
+      } else {
+        console.log('User verified successfully');
       }
 
       // Close the OTP modal and move to Step 2 immediately
@@ -415,14 +472,18 @@ export default function SignUp() {
   };
 
   const validatePassword = (password: string) => {
+    const helperValidation = validatePasswordHelper(password);
+    
+    // Update local validation state for UI
     const validation = {
       length: password.length >= 8,
       hasNumber: /\d/.test(password),
-      hasSpecial: /[!@#$%^&*(),.?":{}|<>]/.test(password),
-      hasAlphabet: /[a-zA-Z]/.test(password)
+      hasUppercase: /[A-Z]/.test(password),
+      hasLowercase: /[a-z]/.test(password)
     };
     setPasswordValidation(validation);
-    return validation.length && validation.hasNumber && validation.hasSpecial && validation.hasAlphabet;
+    
+    return helperValidation.isValid;
   };
 
   const handlePasswordChange = (text: string) => {
@@ -530,6 +591,10 @@ export default function SignUp() {
             value={fullName}
             onChangeText={setFullName}
             autoCapitalize="words"
+            autoCorrect={false}
+            returnKeyType="next"
+            blurOnSubmit={false}
+            enablesReturnKeyAutomatically={true}
           />
         </View>
         
@@ -544,6 +609,10 @@ export default function SignUp() {
               onChangeText={setEmail}
               keyboardType="email-address"
               autoCapitalize="none"
+              autoCorrect={false}
+              returnKeyType="next"
+              blurOnSubmit={false}
+              enablesReturnKeyAutomatically={true}
             />
             <View className="bg-gray-100 border border-gray-200 rounded-r-2xl px-4 py-5 justify-center">
               <Text className="text-gray-700 font-medium text-base">@gmail.com</Text>
@@ -572,6 +641,9 @@ export default function SignUp() {
               }}
               keyboardType="phone-pad"
               maxLength={10}
+              returnKeyType="next"
+              blurOnSubmit={false}
+              enablesReturnKeyAutomatically={true}
             />
           </View>
           <Text className="text-gray-500 text-sm mt-2">Enter 10-digit mobile number</Text>
@@ -587,6 +659,11 @@ export default function SignUp() {
               value={password}
               onChangeText={handlePasswordChange}
               secureTextEntry={!showPassword}
+              autoCapitalize="none"
+              autoCorrect={false}
+              returnKeyType="next"
+              blurOnSubmit={false}
+              enablesReturnKeyAutomatically={true}
             />
             <TouchableOpacity
               onPress={() => setShowPassword(!showPassword)}
@@ -626,22 +703,22 @@ export default function SignUp() {
               </View>
               <View className="flex-row items-center">
                 <View className={`w-2 h-2 rounded-full mr-2 ${
-                  passwordValidation.hasSpecial ? 'bg-green-500' : 'bg-gray-300'
+                  passwordValidation.hasUppercase ? 'bg-green-500' : 'bg-gray-300'
                 }`} />
                 <Text className={`text-sm ${
-                  passwordValidation.hasSpecial ? 'text-green-600' : 'text-gray-500'
+                  passwordValidation.hasUppercase ? 'text-green-600' : 'text-gray-500'
                 }`}>
-                  One special character (!@#$%^&*)
+                  One uppercase letter (A-Z)
                 </Text>
               </View>
               <View className="flex-row items-center">
                 <View className={`w-2 h-2 rounded-full mr-2 ${
-                  passwordValidation.hasAlphabet ? 'bg-green-500' : 'bg-gray-300'
+                  passwordValidation.hasLowercase ? 'bg-green-500' : 'bg-gray-300'
                 }`} />
                 <Text className={`text-sm ${
-                  passwordValidation.hasAlphabet ? 'text-green-600' : 'text-gray-500'
+                  passwordValidation.hasLowercase ? 'text-green-600' : 'text-gray-500'
                 }`}>
-                  One letter (a-z, A-Z)
+                  One lowercase letter (a-z)
                 </Text>
               </View>
             </View>
@@ -840,9 +917,9 @@ export default function SignUp() {
           </Text>
           <View>
             {[
-              { key: 'Low', label: 'Low – Little to no exercise / mostly sitting' },
-              { key: 'Moderate', label: 'Moderate – Some activity, walking or light exercise' },
-              { key: 'High', label: 'High – Regular workouts or physically demanding lifestyle' }
+              { key: 'Low', label: 'Little to no exercise / mostly sitting' },
+              { key: 'Moderate', label: 'Some activity, walking or light exercise' },
+              { key: 'High', label: 'Regular workouts or physically demanding lifestyle' }
             ].map((option, idx, arr) => {
               const isSelected = lifestyleType === option.key;
               return (
@@ -1017,7 +1094,12 @@ export default function SignUp() {
           </Text>
         </TouchableOpacity>
         
-
+        {/* Login Info Note */}
+        <View className="items-center mt-4">
+          <Text className="text-gray-500 text-sm text-center">
+            💡 After signup, you can login with either your email or phone number
+          </Text>
+        </View>
       </View>
 
       {/* OTP Modal */}

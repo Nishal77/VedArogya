@@ -1,7 +1,19 @@
 // app/index.tsx
-import LandingPage from './landing';
+import { useEffect } from 'react';
+import { useRouter } from 'expo-router';
+import { View, ActivityIndicator } from 'react-native';
 
 export default function Index() {
-  // Render the landing page directly as the default page
-  return <LandingPage />;
+  const router = useRouter();
+
+  useEffect(() => {
+    // Redirect to landing page
+    router.replace('/landing');
+  }, []);
+
+  return (
+    <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#FFFFFF' }}>
+      <ActivityIndicator size="large" color="#F4B400" />
+    </View>
+  );
 }
