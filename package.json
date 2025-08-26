@@ -22,7 +22,6 @@
     "test:password-hashing": "jest tests/password-hashing.test.ts",
     "test:helpers": "jest tests/helpers.test.ts",
     "test:password-storage": "jest tests/password-storage-integration.test.ts"
-    "test:password-storage": "jest tests/password-storage-integration.test.ts"
   },
   "dependencies": {
     "@expo/vector-icons": "^14.1.0",
