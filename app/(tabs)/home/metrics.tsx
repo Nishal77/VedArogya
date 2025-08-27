@@ -264,7 +264,7 @@ export default function Metrics() {
               key={index}
               onPress={() => handleDayPress(index)}
               className={`items-center justify-center ${day.isActive
-                  ? 'bg-lime-400 px-3 py-2 rounded-full'
+                  ? 'bg-[#F4B400] px-3 py-2 rounded-full'
                   : 'bg-gray-200 px-3 py-2 rounded-full'
                 }`}
               activeOpacity={0.8}
@@ -276,7 +276,7 @@ export default function Metrics() {
               <View className={`w-6 h-6 rounded-full items-center justify-center mt-1 ${day.isActive ? 'bg-white' : 'bg-white'
                 }`}>
                 {day.isActive ? (
-                  <View className="w-2 h-2 bg-lime-400 rounded-full" />
+                  <View className="w-2 h-2 bg-[#F4B400] rounded-full" />
                 ) : (
                   <Text className="text-xs font-medium text-gray-700">
                     {day.date}
@@ -303,7 +303,7 @@ export default function Metrics() {
         {/* Progress Bar */}
         <View className="mt-3">
           <View className="h-2 bg-gray-200 rounded-full">
-            <View className="h-2 bg-lime-400 rounded-full w-[65%]" />
+            <View className="h-2 bg-[#F4B400] rounded-full w-[65%]" />
           </View>
         </View>
       </View>
@@ -315,7 +315,7 @@ export default function Metrics() {
           <View className="flex-row items-center justify-between mb-3">
             <View className="flex-row items-center">
               <View className="w-8 h-8 bg-gray-100 rounded-full items-center justify-center mr-2">
-                <Bed size={20} color="#374151" />
+                <Bed size={20} color="#667EEA" />
               </View>
               <Text className="text-gray-600 text-sm font-medium">
                 Sleep               </Text>
@@ -346,7 +346,7 @@ export default function Metrics() {
           <View className="flex-row items-center justify-between mb-3">
             <View className="flex-row items-center">
               <View className="w-8 h-8 bg-gray-100 rounded-full items-center justify-center mr-2">
-                <GlassWater size={20} color="#374151" />
+                <GlassWater size={20} color="#63B3ED" />
               </View>
               <Text className="text-gray-600 text-sm font-medium">
               Water Intake    </Text>
@@ -379,7 +379,7 @@ export default function Metrics() {
           <View className="flex-row items-center justify-between mb-3">
             <View className="flex-row items-center">
               <View className="w-8 h-8 bg-gray-100 rounded-full items-center justify-center mr-2">
-                <Zap size={20} color="#374151" />
+                <Zap size={20} color="#F6AD55" />
               </View>
               <Text className="text-gray-600 text-sm font-medium">
                 Energy Level
@@ -411,7 +411,7 @@ export default function Metrics() {
           <View className="flex-row items-center justify-between mb-3">
             <View className="flex-row items-center">
               <View className="w-8 h-8 bg-gray-100 rounded-full items-center justify-center mr-2">
-                <Toilet size={20} color="#374151" />
+                <Toilet size={20} color="#B7791F" />
               </View>
               <Text className="text-gray-600 text-sm font-medium">
               Bowel (Mala)
