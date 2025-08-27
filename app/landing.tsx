@@ -3,6 +3,7 @@ import { View, Text, TouchableOpacity, Dimensions } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { Video, ResizeMode } from 'expo-av';
+import { ChevronRight, MoveRight } from 'lucide-react-native';
 
 const { width, height } = Dimensions.get('window');
 
@@ -47,13 +48,20 @@ export default function LandingPage() {
           
           <View className="pb-20 px-6 items-center">
             <TouchableOpacity 
-              className="bg-[#F4B400] px-20 py-6 rounded-3xl shadow-2xl w-96 max-w-md active:bg-[#7A9F00] active:scale-95 transition-all duration-300"
+              className="bg-[#F4B400] px-8 py-6 rounded-3xl shadow-2xl w-96 max-w-md active:bg-[#7A9F00] active:scale-95 transition-all duration-300 flex-row items-center justify-center"
               activeOpacity={0.9}
               onPress={handleNavigate}
+              style={{
+                flexDirection: 'row',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: 10, // for spacing between text and icon, works in RN 0.71+
+              }}
             >
-              <Text className="text-black text-2xl font-bold text-center tracking-wide">
-                Learn More
+              <Text className="text-black text-2xl font-bold text-center tracking-wide mr-2">
+                Get Started
               </Text>
+              <MoveRight size={28} color="black" />
             </TouchableOpacity>
           </View>
         </View>

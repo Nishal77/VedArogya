@@ -30,12 +30,7 @@ export default function AboutPage() {
       {/* Back Button */}
       <SafeAreaView className="absolute top-0 left-0 right-0 z-10">
         <View className="flex-row items-center p-4">
-          <TouchableOpacity 
-            className="bg-black/30 backdrop-blur-sm w-10 h-10 rounded-full items-center justify-center"
-            onPress={handleBack}
-          >
-            <Text className="text-white text-xl font-bold">←</Text>
-          </TouchableOpacity>
+          {/* Back button removed */}
         </View>
       </SafeAreaView>
       
