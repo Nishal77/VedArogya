@@ -13,7 +13,7 @@ export default function Home() {
       <ScrollView
         className="flex-1"
         showsVerticalScrollIndicator={false}
-        contentContainerStyle={{ paddingBottom: 120 }}
+        contentContainerStyle={{ paddingBottom: 80 }}
       >
         {/* Top Spacing to prevent status bar overlap */}
         <View className="h-4" />

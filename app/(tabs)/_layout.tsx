@@ -81,6 +81,18 @@ export default function TabLayout() {
     router.push(route);
   };
 
+  // Check if we're on the AI screen to hide bottom navigation
+  // Fix: Check for exact match and also check if pathname contains '/ai'
+  const isOnAIScreen = pathname === '/(tabs)/ai' || 
+                       pathname.includes('/ai') || 
+                       pathname.endsWith('/ai') ||
+                       pathname === '/ai';
+  
+  // Debug: Log the current pathname to understand the routing
+  console.log('Current pathname:', pathname);
+  console.log('Is on AI screen:', isOnAIScreen);
+  console.log('Navigation bar should be visible:', !isOnAIScreen);
+
   return (
     <View className="flex-1 bg-white">
       {/* Main Content Area */}
@@ -99,69 +111,71 @@ export default function TabLayout() {
         </Tabs>
       </View>
 
-      {/* Custom Bottom Navigation Bar */}
-      <View className="absolute bottom-0 left-0 right-0 mx-4 mb-6">
-        <View className="bg-white rounded-full shadow-2xl shadow-black/30 py-4 px-6">
-          <View className="flex-row items-center justify-around">
-            {/* Home Tab */}
-            <TouchableOpacity 
-              className="items-center"
-              activeOpacity={0.7}
-              onPress={() => handleTabPress('/(tabs)/home')}
-            >
-              <HomeIcon size={24} color={isActive('/(tabs)/home') ? '#7C3AED' : 'rgba(0, 0, 0, 0.4)'} />
-              <Text className={`text-xs font-semibold mt-2 ${isActive('/(tabs)/home') ? 'text-purple-600' : 'text-gray-500'}`}>
-                Home
-              </Text>
-            </TouchableOpacity>
+      {/* Custom Bottom Navigation Bar - Hidden on AI Screen */}
+      {!isOnAIScreen && (
+        <View className="absolute bottom-0 left-0 right-0 mx-4 mb-6 z-50">
+          <View className="bg-white rounded-full shadow-2xl shadow-black/30 py-4 px-6">
+            <View className="flex-row items-center justify-around">
+              {/* Home Tab */}
+              <TouchableOpacity 
+                className="items-center"
+                activeOpacity={0.7}
+                onPress={() => handleTabPress('/(tabs)/home')}
+              >
+                <HomeIcon size={24} color={isActive('/(tabs)/home') ? '#7C3AED' : 'rgba(0, 0, 0, 0.4)'} />
+                <Text className={`text-xs font-semibold mt-2 ${isActive('/(tabs)/home') ? 'text-purple-600' : 'text-gray-500'}`}>
+                  Home
+                </Text>
+              </TouchableOpacity>
 
-            {/* Routine Tab */}
-            <TouchableOpacity 
-              className="items-center"
-              activeOpacity={0.7}
-              onPress={() => handleTabPress('/(tabs)/routine')}
-            >
-              <RoutineIcon size={24} color={isActive('/(tabs)/routine') ? '#7C3AED' : 'rgba(0, 0, 0, 0.4)'} />
-              <Text className={`text-xs font-semibold mt-2 ${isActive('/(tabs)/routine') ? 'text-purple-600' : 'text-gray-500'}`}>
-                Routine
-              </Text>
-            </TouchableOpacity>
+              {/* Routine Tab */}
+              <TouchableOpacity 
+                className="items-center"
+                activeOpacity={0.7}
+                onPress={() => handleTabPress('/(tabs)/routine')}
+              >
+                <RoutineIcon size={24} color={isActive('/(tabs)/routine') ? '#7C3AED' : 'rgba(0, 0, 0, 0.4)'} />
+                <Text className={`text-xs font-semibold mt-2 ${isActive('/(tabs)/routine') ? 'text-purple-600' : 'text-gray-500'}`}>
+                  Routine
+                </Text>
+              </TouchableOpacity>
 
-            {/* Central AI Button */}
-            <TouchableOpacity 
-              className="w-14 h-14 bg-[#F4B400] rounded-full items-center justify-center shadow-lg shadow-[#F4B400]-600/40 "
-              activeOpacity={0.5}
-              onPress={() => handleTabPress('/(tabs)/ai')}
-            >
-              <BotIcon size={26} color="black" />
-            </TouchableOpacity>
+              {/* Central AI Button */}
+              <TouchableOpacity 
+                className="w-14 h-14 bg-[#F4B400] rounded-full items-center justify-center shadow-lg shadow-[#F4B400]-600/40 "
+                activeOpacity={0.5}
+                onPress={() => handleTabPress('/(tabs)/ai')}
+              >
+                <BotIcon size={26} color="black" />
+              </TouchableOpacity>
 
-            {/* Progress Tab */}
-            <TouchableOpacity 
-              className="items-center"
-              activeOpacity={0.7}
-              onPress={() => handleTabPress('/(tabs)/appointment')}
-            >
-              <ProgressIcon size={24} color={isActive('/(tabs)/appointment') ? '#7C3AED' : 'rgba(0, 0, 0, 0.4)'} />
-              <Text className={`text-xs font-semibold mt-2 ${isActive('/(tabs)/appointment') ? 'text-purple-600' : 'text-gray-500'}`}>
-                Progress
-              </Text>
-            </TouchableOpacity>
+              {/* Progress Tab */}
+              <TouchableOpacity 
+                className="items-center"
+                activeOpacity={0.7}
+                onPress={() => handleTabPress('/(tabs)/appointment')}
+              >
+                <ProgressIcon size={24} color={isActive('/(tabs)/appointment') ? '#7C3AED' : 'rgba(0, 0, 0, 0.4)'} />
+                <Text className={`text-xs font-semibold mt-2 ${isActive('/(tabs)/appointment') ? 'text-purple-600' : 'text-gray-500'}`}>
+                  Progress
+                </Text>
+              </TouchableOpacity>
 
-            {/* Profile Tab */}
-            <TouchableOpacity 
-              className="items-center"
-              activeOpacity={0.7}
-              onPress={() => handleTabPress('/(tabs)/profile')}
-            >
-              <UserIcon size={24} color={isActive('/(tabs)/profile') ? '#7C3AED' : 'rgba(0, 0, 0, 0.4)'} />
-              <Text className={`text-xs font-semibold mt-2 ${isActive('/(tabs)/profile') ? 'text-purple-600' : 'text-gray-500'}`}>
-                Profile
-              </Text>
-            </TouchableOpacity>
+              {/* Profile Tab */}
+              <TouchableOpacity 
+                className="items-center"
+                activeOpacity={0.7}
+                onPress={() => handleTabPress('/(tabs)/profile')}
+              >
+                <UserIcon size={24} color={isActive('/(tabs)/profile') ? '#7C3AED' : 'rgba(0, 0, 0, 0.4)'} />
+                <Text className={`text-xs font-semibold mt-2 ${isActive('/(tabs)/profile') ? 'text-purple-600' : 'text-gray-500'}`}>
+                  Profile
+                </Text>
+              </TouchableOpacity>
+            </View>
           </View>
         </View>
-      </View>
+      )}
     </View>
   );
 }
