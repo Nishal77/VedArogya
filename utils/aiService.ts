@@ -24,8 +24,6 @@ class AIService {
       throw new Error('OpenRouter API key is required');
     }
 
-    console.log('Initializing AI Service with API key:', apiKey.substring(0, 10) + '...');
-
     this.openai = new OpenAI({
       baseURL: "https://openrouter.ai/api/v1",
       apiKey: apiKey,
@@ -48,7 +46,6 @@ class AIService {
     if (!AIService.instance) {
       try {
         AIService.instance = new AIService();
-        console.log('AI Service initialized successfully with Ayurveda system prompt');
       } catch (error) {
         console.error('Failed to initialize AI Service:', error);
         throw error;
@@ -62,7 +59,6 @@ class AIService {
       const { data: { user } } = await supabase.auth.getUser();
       
       if (!user) {
-        console.log('No authenticated user found');
         return null;
       }
 
@@ -79,7 +75,6 @@ class AIService {
       }
 
       if (userData && userData.full_name) {
-        console.log('Fetched user name:', userData.full_name);
         return userData.full_name;
       }
 
@@ -97,11 +92,9 @@ class AIService {
       if (userName) {
         // Replace the system prompt with one that includes the user's name
         systemMessage.content = AYURVEDA_SYSTEM_PROMPT.replace(/\${userName}/g, userName);
-        console.log('Updated system prompt with user name:', userName);
       } else {
         // Use default system prompt without user name
         systemMessage.content = AYURVEDA_SYSTEM_PROMPT.replace(/\${userName}/g, 'Seeker');
-        console.log('Using default system prompt without user name');
       }
     }
   }
@@ -122,8 +115,6 @@ class AIService {
 
   public async sendMessage(userMessage: string): Promise<string> {
     try {
-      console.log('Sending message to AI:', userMessage);
-
       // Fetch user name if not already fetched
       if (this.userName === null) {
         this.userName = await this.fetchUserName();
@@ -154,9 +145,6 @@ class AIService {
         this.isFirstInteraction = false;
       }
 
-      console.log('Calling OpenRouter API with messages:', messages.length);
-      console.log('System prompt included:', messages[0].content.substring(0, 100) + '...');
-
       const completion = await this.openai.chat.completions.create({
         model: "meta-llama/llama-3-8b-instruct",
         messages: messages,
@@ -165,8 +153,6 @@ class AIService {
       });
 
       const aiResponse = completion.choices[0]?.message?.content || "Sorry, I couldn't generate a response.";
-
-      console.log('AI Response received:', aiResponse.substring(0, 100) + '...');
 
       const aiMsg: ChatMessage = {
         id: this.generateId(),
@@ -202,7 +188,6 @@ class AIService {
     const systemPrompt = this.conversationHistory.find(msg => msg.role === 'system');
     this.conversationHistory = systemPrompt ? [systemPrompt] : [];
     this.isFirstInteraction = true; // Reset first interaction flag
-    console.log('Conversation history cleared (system prompt preserved)');
   }
 
   public getMessageCount(): number {

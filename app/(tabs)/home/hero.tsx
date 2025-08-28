@@ -1,13 +1,19 @@
 import React from 'react';
 import { View, Text, TextInput, TouchableOpacity, Image } from 'react-native';
 import { Search, Mic, Bell } from 'lucide-react-native';
+import { useRouter } from 'expo-router';
 import { useAuth } from '../../../utils/AuthContext';
 
 export default function Hero() {
   const { user } = useAuth();
+  const router = useRouter();
 
   // Default image from Supabase storage
   const defaultImageUrl = 'https://gdlpmqlqtfpcycqbmbmp.supabase.co/storage/v1/object/public/icons/ayverdha.jpeg';
+
+  const handleAISearchPress = () => {
+    router.push('/(tabs)/ai');
+  };
 
   return (
     <View className="px-6 pt-8 pb-6">
@@ -44,16 +50,18 @@ export default function Hero() {
         </TouchableOpacity>
       </View>
 
-      {/* AI Search Input */}
-      <View className="bg-gray-50 rounded-2xl p-4 flex-row items-center">
+      {/* AI Search Input - Clickable */}
+      <TouchableOpacity 
+        onPress={handleAISearchPress}
+        activeOpacity={0.7}
+        className="bg-gray-50 rounded-2xl p-4 flex-row items-center border border-gray-200"
+      >
         <Search size={20} color="#6B7280" className="mr-3" />
-        <TextInput
-          placeholder="Ask AI about your wellness..."
-          placeholderTextColor="#9CA3AF"
-          className="flex-1 text-gray-800 text-base ml-2"
-        />
+        <Text className="flex-1 text-gray-400 text-base ml-2">
+          Ask AI about your wellness...
+        </Text>
         <Mic size={20} color="#6B7280" />
-      </View>
+      </TouchableOpacity>
     </View>
   );
 }

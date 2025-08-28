@@ -15,7 +15,6 @@ export default function Header({ onClearConversation }: HeaderProps) {
     // Clear conversation before navigating back
     if (onClearConversation) {
       onClearConversation();
-      console.log('Conversation cleared before navigation');
     }
     
     // Navigate back to home

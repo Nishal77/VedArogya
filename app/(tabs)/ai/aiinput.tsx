@@ -73,23 +73,16 @@ export default function AIInput({ onFocusChange }: AIInputProps) {
   const handleClearConversation = () => {
     aiService.clearConversation();
     setMessages([]);
-    console.log('Conversation cleared');
   };
 
   const handleSend = async () => {
     const trimmedText = inputText.trim();
     
-    console.log('handleSend called with text:', trimmedText);
-    console.log('Current loading state:', isLoading);
-    
     if (!trimmedText || isLoading) {
-      console.log('Cannot send: empty text or already loading');
       return;
     }
 
     try {
-      console.log('Sending message:', trimmedText);
-      
       // Clear input immediately for better UX
       setInputText('');
       setIsLoading(true);
@@ -97,7 +90,6 @@ export default function AIInput({ onFocusChange }: AIInputProps) {
 
       // Send message to AI service
       const response = await aiService.sendMessage(trimmedText);
-      console.log('AI response received:', response);
       
       // Update messages with both user input and AI response
       const newMessages = aiService.getConversationHistory();
@@ -134,7 +126,6 @@ export default function AIInput({ onFocusChange }: AIInputProps) {
 
   const handleAttachment = () => {
     // Add attachment logic here
-    console.log('Opening attachment options');
   };
 
   return (
@@ -253,7 +244,6 @@ export default function AIInput({ onFocusChange }: AIInputProps) {
                   {/* Send Button - Fixed Touch Area */}
                   <TouchableOpacity 
                     onPress={() => {
-                      console.log('Send button pressed!');
                       handleSend();
                     }}
                     disabled={!inputText.trim() || isLoading}

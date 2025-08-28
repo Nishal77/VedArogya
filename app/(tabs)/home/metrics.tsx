@@ -292,11 +292,11 @@ export default function Metrics() {
           <View className="flex-row items-center">
             <Flame size={20} color="#374151" />
             <Text className="text-gray-700 text-base ml-2 font-medium">
-              Calories left
+            Daily Balance & Vitality
             </Text>
           </View>
           <Text className="text-3xl font-bold text-gray-900">
-            1,250
+            Good
           </Text>
         </View>
 

@@ -81,17 +81,24 @@ export default function TabLayout() {
     router.push(route);
   };
 
-  // Check if we're on the AI screen to hide bottom navigation
-  // Fix: Check for exact match and also check if pathname contains '/ai'
+  // Check if we're on the AI screen or Routine screen to hide bottom navigation
   const isOnAIScreen = pathname === '/(tabs)/ai' || 
                        pathname.includes('/ai') || 
                        pathname.endsWith('/ai') ||
                        pathname === '/ai';
   
+  const isOnRoutineScreen = pathname === '/(tabs)/routine' || 
+                            pathname.includes('/routine') || 
+                            pathname.endsWith('/routine') ||
+                            pathname === '/routine';
+  
+  const shouldHideNavbar = isOnAIScreen || isOnRoutineScreen;
+  
   // Debug: Log the current pathname to understand the routing
   console.log('Current pathname:', pathname);
   console.log('Is on AI screen:', isOnAIScreen);
-  console.log('Navigation bar should be visible:', !isOnAIScreen);
+  console.log('Is on Routine screen:', isOnRoutineScreen);
+  console.log('Navigation bar should be visible:', !shouldHideNavbar);
 
   return (
     <View className="flex-1 bg-white">
@@ -112,7 +119,7 @@ export default function TabLayout() {
       </View>
 
       {/* Custom Bottom Navigation Bar - Hidden on AI Screen */}
-      {!isOnAIScreen && (
+      {!shouldHideNavbar && (
         <View className="absolute bottom-0 left-0 right-0 mx-4 mb-6 z-50">
           <View className="bg-white rounded-full shadow-2xl shadow-black/30 py-4 px-6">
             <View className="flex-row items-center justify-around">

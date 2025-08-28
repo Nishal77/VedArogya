@@ -12,7 +12,6 @@ export default function AIScreen() {
 
   const handleClearConversation = () => {
     aiService.clearConversation();
-    console.log('Conversation cleared from main screen');
   };
 
   return (
