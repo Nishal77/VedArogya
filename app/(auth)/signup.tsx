@@ -490,35 +490,27 @@ export default function SignUp() {
         
         <View className='mb-2'>
           <Text className="text-gray-700 font-semibold mb-2 text-base">Email</Text>
-          <View className="flex-row items-center">
-            <TextInput
-              className="flex-1 bg-gray-50 border border-black/30  border-r-0 rounded-l-2xl px-5 py-5 text-gray-800 text-base"
-              placeholder="Enter your email"
-              placeholderTextColor="#9CA3AF"
-              value={email}
-              onChangeText={setEmail}
-              keyboardType="email-address"
-              autoCapitalize="none"
-              autoCorrect={false}
-              returnKeyType="next"
-              blurOnSubmit={false}
-              enablesReturnKeyAutomatically={true}
-            />
-            <View className="bg-gray-100 border border-gray-200 rounded-r-2xl px-4 py-5 justify-center">
-              <Text className="text-gray-700 font-medium text-base">@gmail.com</Text>
-            </View>
-          </View>
+          <TextInput
+            className="bg-gray-50 border border-black/30 rounded-2xl px-5 py-5 text-gray-800 text-base"
+            placeholder="Enter your email"
+            placeholderTextColor="#9CA3AF"
+            value={email}
+            onChangeText={setEmail}
+            keyboardType="email-address"
+            autoCapitalize="none"
+            autoCorrect={false}
+            returnKeyType="next"
+            blurOnSubmit={false}
+            enablesReturnKeyAutomatically={true}
+          />
           <Text className="text-gray-500 text-sm mt-2">Enter your Gmail address</Text>
         </View>
         
         <View className='mb-2'>
           <Text className="text-gray-700 font-semibold mb-2 text-base">Phone Number</Text>
           <View className="flex-row items-center">
-            <View className="bg-gray-100 border border-gray-200 rounded-l-2xl px-4 py-5 justify-center">
-              <Text className="text-gray-700 font-medium text-base">+91</Text>
-            </View>
             <TextInput
-              className="flex-1 bg-gray-50 border border-black/30  border-l-0 rounded-r-2xl px-5 py-5 text-gray-800 text-base"
+              className="flex-1 bg-gray-50 border border-black/30 rounded-2xl px-5 py-5 text-gray-800 text-base"
               placeholder="Enter your phone number"
               placeholderTextColor="#9CA3AF"
               value={phoneNumber}
@@ -534,16 +526,37 @@ export default function SignUp() {
               returnKeyType="next"
               blurOnSubmit={false}
               enablesReturnKeyAutomatically={true}
+              // Show +91 as uneditable prefix
+              textContentType="telephoneNumber"
+              autoCorrect={false}
+              autoCapitalize="none"
+              // Add left icon/prefix
+              style={{
+                paddingLeft: 56, // leave space for prefix
+              }}
             />
+            {/* Absolute +91 prefix inside the input */}
+            <View
+              style={{
+                position: 'absolute',
+                left: 18,
+                zIndex: 1,
+                height: '100%',
+                justifyContent: 'center',
+              }}
+              pointerEvents="none"
+            >
+              <Text className="text-gray-700 font-medium text-base">+91</Text>
+            </View>
           </View>
           <Text className="text-gray-500 text-sm mt-2">Enter 10-digit mobile number</Text>
         </View>
         
         <View className='mb-2'>
           <Text className="text-gray-700 font-semibold mb-2 text-base">Password</Text>
-          <View className="flex-row items-center">
+          <View className="relative">
             <TextInput
-              className="flex-1 bg-gray-50 border border-black/30  border-r-0 rounded-l-2xl px-5 py-5 text-gray-800 text-base"
+              className="bg-gray-50 border border-black/30 rounded-2xl px-5 py-5 text-gray-800 text-base pr-12"
               placeholder="Create a password"
               placeholderTextColor="#9CA3AF"
               value={password}
@@ -557,7 +570,9 @@ export default function SignUp() {
             />
             <TouchableOpacity
               onPress={() => setShowPassword(!showPassword)}
-              className="bg-gray-100 border border-gray-200 rounded-r-2xl px-4 py-5 justify-center"
+              className="absolute right-4 top-1/2 -mt-3"
+              style={{ height: 24, width: 24, justifyContent: 'center', alignItems: 'center' }}
+              hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
             >
               {showPassword ? (
                 <EyeOff size={20} color="#6B7280" />
@@ -617,9 +632,9 @@ export default function SignUp() {
         
         <View>
           <Text className="text-gray-700 font-semibold mb-2 text-base">Confirm Password</Text>
-          <View className="flex-row items-center">
+          <View className="relative">
             <TextInput
-              className="flex-1 bg-gray-50 border border-black/30  border-r-0 rounded-2xl px-5 py-5 text-gray-800 text-base"
+              className="bg-gray-50 border border-black/30 rounded-2xl px-5 py-5 text-gray-800 text-base pr-12"
               placeholder="Confirm your password"
               placeholderTextColor="#9CA3AF"
               value={confirmPassword}
@@ -628,7 +643,9 @@ export default function SignUp() {
             />
             <TouchableOpacity
               onPress={() => setShowConfirmPassword(!showConfirmPassword)}
-              className="bg-gray-100 border border-gray-200 rounded-r-2xl px-4 py-5 justify-center"
+              className="absolute right-3 top-1/2 -mt-3"
+              style={{ height: 24, width: 32, justifyContent: 'center', alignItems: 'center' }}
+              hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
             >
               {showConfirmPassword ? (
                 <EyeOff size={20} color="#6B7280" />
