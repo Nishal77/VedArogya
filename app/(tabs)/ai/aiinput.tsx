@@ -9,7 +9,8 @@ import {
   Keyboard,
   KeyboardAvoidingView,
   ScrollView,
-  ActivityIndicator
+  ActivityIndicator,
+  Image
 } from 'react-native';
 import { 
   Plus, 
@@ -155,18 +156,25 @@ export default function AIInput({ onFocusChange }: AIInputProps) {
             {messages.length === 0 ? (
               <View className="flex-1 items-center justify-center py-20">
                 <View className="items-center space-y-4">
-                  <View className="w-16 h-16 bg-blue-100 rounded-full items-center justify-center">
-                    <Text className="text-2xl">🌿</Text>
+                  <View className="w-16 h-16 rounded-full items-center justify-center">
+                    <Image 
+                      source={{
+                        uri: 'https://gdlpmqlqtfpcycqbmbmp.supabase.co/storage/v1/object/public/icons/Screenshot%202025-08-28%20at%207.16.19%20PM.png',
+                        cache: 'reload'
+                      }}
+                      style={{ width: 48, height: 48 }}
+                      className="rounded-full"
+                    />
                   </View>
                   <Text className="text-xl font-semibold text-gray-800 text-center">
                     Welcome to AyushMitra!
                   </Text>
                   <Text className="text-base text-gray-600 text-center px-8 leading-6">
-                    I'm your Ayurveda health and wellness guide. Ask me about natural remedies, Yoga, daily routines, doshas, and holistic living. I'm here to support your wellness journey!
+                  Your Ayurveda guide for remedies, Yoga, and daily balance here to support you.
                   </Text>
-                  <View className="mt-6 bg-blue-50 rounded-2xl px-6 py-4 border border-blue-200">
-                    <Text className="text-sm text-blue-800 text-center">
-                      💡 Try asking: "How can I improve my sleep naturally?" or "What are good foods for Pitta dosha?"
+                  <View className="mt-6 bg-gray-50 rounded-2xl px-6 py-4 border border-gray-400">
+                    <Text className="text-sm text-gray-600 text-center">
+                      <Text style={{ fontWeight: 'bold' }}>Try asking:</Text> "How can I improve my sleep naturally?" or "What are good foods for Pitta dosha?"
                     </Text>
                   </View>
                 </View>
@@ -191,14 +199,14 @@ export default function AIInput({ onFocusChange }: AIInputProps) {
           </ScrollView>
         </View>
 
-        {/* Input Area - Minimal Spacing Above Keyboard */}
-        <View className="bg-white border-t border-gray-100">
+        {/* Input Area - Minimal Spacing Above Keyboard  border-t border-gray-100*/}
+        <View className="bg-white"> 
           {/* Main Input Field - Perfect ChatGPT Style */}
           <View className="px-6 py-2 bg-white">
             {/* Horizontal Layout - Plus Icon and Input Field on Same Line */}
             <View className="flex-row items-center space-x-3">
               {/* Plus Icon Box - Left Side */}
-              <View className="w-12 h-12 bg-gray-100 rounded-2xl items-center justify-center shadow-sm border border-gray-200 mr-2">
+              <View className="w-16 h-16 bg-gray-100 rounded-2xl items-center justify-center border border-gray-200 mr-2">
                 <TouchableOpacity 
                   onPress={handleAttachment}
                   className="w-full h-full items-center justify-center"

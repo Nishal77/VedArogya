@@ -18,14 +18,14 @@ export default function AIScreen() {
   return (
     <SafeAreaView className="flex-1 bg-white" edges={['top']}>
       <StatusBar style="dark" />
-      
+
       {/* Fixed Header */}
       <View className="bg-white border-b border-gray-100">
         <Header onClearConversation={handleClearConversation} />
       </View>
 
       {/* AI Input Component - Full Screen Chat Interface */}
-      <AIInput 
+      <AIInput
         onFocusChange={setIsInputFocused}
       />
     </SafeAreaView>
