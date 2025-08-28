@@ -1,15 +1,60 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, TextInput, TouchableOpacity, Image } from 'react-native';
 import { Search, Mic, Bell } from 'lucide-react-native';
 import { useRouter } from 'expo-router';
 import { useAuth } from '../../../utils/AuthContext';
+import { supabase } from '../../../utils/supabase';
 
 export default function Hero() {
   const { user } = useAuth();
   const router = useRouter();
+  const [profileImage, setProfileImage] = useState<string | null>(null);
 
   // Default image from Supabase storage
   const defaultImageUrl = 'https://gdlpmqlqtfpcycqbmbmp.supabase.co/storage/v1/object/public/icons/ayverdha.jpeg';
+
+  useEffect(() => {
+    if (user?.id) {
+      fetchProfileImage();
+    }
+  }, [user]);
+
+  const fetchProfileImage = async () => {
+    try {
+      if (user?.id) {
+        // Fetch from user_details table using user_id
+        const { data, error } = await supabase
+          .from('user_details')
+          .select('profile_image')
+          .eq('user_id', user.id)
+          .single();
+
+        if (error) {
+          console.error('Error fetching profile image from user_details table:', error);
+        } else if (data?.profile_image) {
+          console.log('Profile image found in hero:', data.profile_image);
+          setProfileImage(data.profile_image);
+        } else {
+          console.log('No profile image found in user_details, using default');
+        }
+      }
+    } catch (error) {
+      console.error('Error in fetchProfileImage:', error);
+    }
+  };
+
+  const getDisplayProfileImage = () => {
+    // First try to get from user_details table
+    if (profileImage) {
+      return profileImage;
+    }
+    // Fallback to auth metadata
+    if (user?.user_metadata?.avatar_url) {
+      return user.user_metadata.avatar_url;
+    }
+    // Final fallback to default image
+    return defaultImageUrl;
+  };
 
   const handleAISearchPress = () => {
     router.push('/(tabs)/ai');
@@ -25,7 +70,7 @@ export default function Hero() {
           <View className="w-12 h-12 rounded-full mr-4 overflow-hidden">
             <Image 
               source={{ 
-                uri: user?.user_metadata?.avatar_url || defaultImageUrl 
+                uri: getDisplayProfileImage()
               }}
               className="w-12 h-12 rounded-full"
               defaultSource={{ uri: defaultImageUrl }}
