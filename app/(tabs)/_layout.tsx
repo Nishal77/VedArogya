@@ -114,6 +114,7 @@ export default function TabLayout() {
           <Tabs.Screen name="appointment" />
           <Tabs.Screen name="ai" />
           <Tabs.Screen name="routine" />
+          <Tabs.Screen name="progress" />
           <Tabs.Screen name="profile" />
         </Tabs>
       </View>
@@ -160,10 +161,10 @@ export default function TabLayout() {
               <TouchableOpacity 
                 className="items-center"
                 activeOpacity={0.7}
-                onPress={() => handleTabPress('/(tabs)/appointment')}
+                onPress={() => handleTabPress('/(tabs)/progress')}
               >
-                <ProgressIcon size={24} color={isActive('/(tabs)/appointment') ? '#7C3AED' : 'rgba(0, 0, 0, 0.4)'} />
-                <Text className={`text-xs font-semibold mt-2 ${isActive('/(tabs)/appointment') ? 'text-purple-600' : 'text-gray-500'}`}>
+                <ProgressIcon size={24} color={isActive('/(tabs)/progress') ? '#7C3AED' : 'rgba(0, 0, 0, 0.4)'} />
+                <Text className={`text-xs font-semibold mt-2 ${isActive('/(tabs)/progress') ? 'text-purple-600' : 'text-gray-500'}`}>
                   Progress
                 </Text>
               </TouchableOpacity>

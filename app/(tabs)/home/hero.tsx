@@ -61,13 +61,13 @@ export default function Hero() {
   };
 
   return (
-    <View className="px-6 pt-8 pb-6">
+    <View className="px-6 pt-8 pb-6 bg-white">
       {/* Profile and Greeting Section */}
       <View className="flex-row items-center justify-between mb-6">
         {/* Left Side - Profile and Greeting */}
         <View className="flex-row items-center flex-1">
           {/* Profile Picture */}
-          <View className="w-12 h-12 rounded-full mr-4 overflow-hidden">
+          <View className="w-12 h-12 rounded-full mr-4 overflow-hidden bg-white/60">
             <Image 
               source={{ 
                 uri: getDisplayProfileImage()
@@ -90,7 +90,7 @@ export default function Hero() {
         </View>
 
         {/* Right Side - Bell Icon */}
-        <TouchableOpacity className="bg-gray-100 rounded-xl p-3 ml-4">
+        <TouchableOpacity className="bg-white/60 rounded-xl p-3 ml-4">
           <Bell size={24} color="#374151" />
         </TouchableOpacity>
       </View>
@@ -99,7 +99,7 @@ export default function Hero() {
       <TouchableOpacity 
         onPress={handleAISearchPress}
         activeOpacity={0.7}
-        className="bg-gray-50 rounded-2xl p-4 flex-row items-center border border-gray-200"
+        className="bg-white/60 rounded-2xl p-4 flex-row items-center border border-gray-200"
       >
         <Search size={20} color="#6B7280" className="mr-3" />
         <Text className="flex-1 text-gray-400 text-base ml-2">

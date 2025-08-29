@@ -1,58 +1,27 @@
 import React from 'react';
-import { View, ScrollView, TouchableOpacity, Text } from 'react-native';
-import { BlurView } from 'expo-blur';
+import { View, Text, ScrollView } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { Calendar } from 'lucide-react-native';
-import { useRouter } from 'expo-router';
-import Hero from './hero';
-import Appointment from './appointment';
-import Metrics from './metrics';
-import TodoList from './todolist';
+import { BlurView } from 'expo-blur';
 
-export default function Home() {
-  const router = useRouter();
-
-  const handleConsultPress = () => {
-    // Navigate to appointment screen
-    router.push('/(tabs)/appointment');
-  };
-
+export default function Progress() {
   return (
     <SafeAreaView className="flex-1 bg-white">
       <ScrollView
         className="flex-1"
         showsVerticalScrollIndicator={false}
-        contentContainerStyle={{ paddingBottom: 80 }}
+        contentContainerStyle={{ paddingBottom: 120 }}
       >
         {/* Top Spacing to prevent status bar overlap */}
         <View className="h-4" />
         
-        <Hero />
-        <Appointment />
-        <Metrics />
-        <TodoList />
-        <View className="px-6 py-4">
-          {/* Additional content will go here */}
+        {/* Progress Section */}
+        <View className="px-6 py-8">
+          <Text className="text-2xl font-bold text-gray-800 text-center">
+            Progress Section
+          </Text>
         </View>
       </ScrollView>
-      
-      {/* Floating Appointment Button - Above Bottom Navbar */}
-      <View className="absolute bottom-28 right-6 z-50 mb-2">
-        <TouchableOpacity
-          onPress={handleConsultPress}
-          className="items-center"
-          activeOpacity={0.8}
-        >
-          {/* Main Button with Shadow */}
-          <View className="w-16 h-16 bg-black rounded-full items-center justify-center border border-gray-200">
-            <Calendar size={28} color="white" strokeWidth={2.5} />
-          </View>
-          
-          {/* Subtle Glow Effect */}
-          <View className="absolute inset-0 w-16 h-16 bg-gray-100 rounded-full opacity-30 blur-sm" />
-        </TouchableOpacity>
-      </View>
-      
+
       {/* Bottom Blur Effect - Seamless Smooth Transition */}
       <View className="absolute bottom-24 left-0 right-0 h-2 z-40">
         <BlurView 
