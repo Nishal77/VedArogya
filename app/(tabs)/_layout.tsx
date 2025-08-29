@@ -81,7 +81,7 @@ export default function TabLayout() {
     router.push(route);
   };
 
-  // Check if we're on the AI screen or Routine screen to hide bottom navigation
+  // Check if we're on specific screens to hide bottom navigation
   const isOnAIScreen = pathname === '/(tabs)/ai' || 
                        pathname.includes('/ai') || 
                        pathname.endsWith('/ai') ||
@@ -91,13 +91,19 @@ export default function TabLayout() {
                             pathname.includes('/routine') || 
                             pathname.endsWith('/routine') ||
                             pathname === '/routine';
+
+  const isOnAppointmentScreen = pathname === '/(tabs)/appointment' || 
+                                pathname.includes('/appointment') || 
+                                pathname.endsWith('/appointment') ||
+                                pathname === '/appointment';
   
-  const shouldHideNavbar = isOnAIScreen || isOnRoutineScreen;
+  const shouldHideNavbar = isOnAIScreen || isOnRoutineScreen || isOnAppointmentScreen;
   
   // Debug: Log the current pathname to understand the routing
   console.log('Current pathname:', pathname);
   console.log('Is on AI screen:', isOnAIScreen);
   console.log('Is on Routine screen:', isOnRoutineScreen);
+  console.log('Is on Appointment screen:', isOnAppointmentScreen);
   console.log('Navigation bar should be visible:', !shouldHideNavbar);
 
   return (
@@ -119,7 +125,7 @@ export default function TabLayout() {
         </Tabs>
       </View>
 
-      {/* Custom Bottom Navigation Bar - Hidden on AI Screen */}
+      {/* Custom Bottom Navigation Bar - Hidden on specific screens */}
       {!shouldHideNavbar && (
         <View className="absolute bottom-0 left-0 right-0 mx-4 mb-6 z-50">
           <View className="bg-white rounded-full shadow-2xl shadow-black/30 py-4 px-6">
@@ -182,6 +188,24 @@ export default function TabLayout() {
               </TouchableOpacity>
             </View>
           </View>
+        </View>
+      )}
+
+      {/* Book Appointment Button - Shown only on appointment screen */}
+      {isOnAppointmentScreen && (
+        <View className="absolute bottom-0 left-0 right-0 mx-4 mb-6 z-50">
+          <TouchableOpacity 
+            className="bg-[#F4B400] rounded-full py-4 px-8 mb-3"
+            activeOpacity={0.8}
+            onPress={() => {
+              // Handle booking appointment
+              console.log('Book Appointment pressed');
+            }}
+          >
+            <Text className="text-black text-lg font-bold text-center">
+              Book Appointment
+            </Text>
+          </TouchableOpacity>
         </View>
       )}
     </View>
