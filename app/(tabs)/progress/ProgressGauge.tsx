@@ -55,7 +55,7 @@ const ProgressGauge: React.FC<Props> = ({ value }) => {
   const category = getCategory(value);
 
   return (
-    <View className="items-center justify-center bg-gradient-to-r from-gray-100 to-white p-8 rounded-3xl">
+    <View className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-2xl p-6 border border-blue-100">
       {/* Circular Progress Gauge */}
       <View className="relative mb-6">
         <Svg width={size} height={size}>

@@ -7,6 +7,9 @@ import ProgressSubheading from './subheading';
 import ProgressGauge from './ProgressGauge';
 import MoodTracker from './MoodTracker';
 import Water from './Water';
+import Sleep from './Sleep';
+import MealPortions from './MealPortions';
+import DigestionQuality from './DigestionQuality';
 
 export default function Progress() {
   return (
@@ -35,8 +38,23 @@ export default function Progress() {
         </View>
 
         {/* Water Intake Tracker */}
-        <View className="py-2 mx-6">
+        <View className="py-0 mx-6">
           <Water />
+        </View>
+
+        {/* Sleep Pattern Tracker */}
+        <View className="py-0 mx-6">
+          <Sleep />
+        </View>
+
+        {/* Meal Portions Tracker */}
+        <View className="py-0 mx-6">
+          <MealPortions />
+        </View>
+
+        {/* Digestion Quality Tracker */}
+        <View className="py-0 mx-6">
+          <DigestionQuality />
         </View>
         
         {/* Progress Section */}

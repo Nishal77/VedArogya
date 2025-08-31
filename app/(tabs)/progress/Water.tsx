@@ -1,7 +1,7 @@
 // Water.tsx
-import React, { useEffect, useRef } from "react";
-import { View, Text, Animated } from "react-native";
-import Svg, { Rect, Line, Text as SvgText, Circle, Defs, LinearGradient, Stop } from "react-native-svg";
+import React from "react";
+import { View, Text } from "react-native";
+import Svg, { Rect, Line, Text as SvgText, Defs, LinearGradient, Stop } from "react-native-svg";
 
 type WaterData = {
   day: string;
@@ -19,38 +19,6 @@ const Water: React.FC = () => {
     { day: "Sat", consumed: 4.1, target: 4 },
     { day: "Sun", consumed: 3.5, target: 4 },
   ];
-
-  // Animation values - fixed initialization
-  const animatedValues = useRef<Animated.Value[]>([]);
-  const fadeAnim = useRef(new Animated.Value(0));
-
-  // Initialize animation values
-  React.useEffect(() => {
-    animatedValues.current = waterData.map(() => new Animated.Value(0));
-  }, []);
-
-  useEffect(() => {
-    // Fade in animation
-    Animated.timing(fadeAnim.current, {
-      toValue: 1,
-      duration: 800,
-      useNativeDriver: false,
-    }).start();
-
-    // Staggered bar fill animation
-    if (animatedValues.current.length > 0) {
-      const animations = animatedValues.current.map((_, index) =>
-        Animated.timing(animatedValues.current[index], {
-          toValue: 1,
-          duration: 600,
-          delay: index * 100,
-          useNativeDriver: false,
-        })
-      );
-
-      Animated.stagger(100, animations).start();
-    }
-  }, []);
 
   // Optimized chart dimensions - compact and fits all days
   const containerWidth = 380; // Reduced container width
@@ -94,9 +62,9 @@ const Water: React.FC = () => {
   };
 
   return (
-    <View className="bg-white rounded-2xl p-6 border border-gray-200 shadow-lg">
+    <View className="bg-gradient-to-br from-cyan-50 to-blue-50 rounded-2xl p-6 border border-cyan-100">
       {/* Compact Header */}
-      <View className="mb-6">
+      <View className="mb-1">
         <Text className="text-xl font-bold text-gray-800 mb-2">
           Daily Water Intake
         </Text>
@@ -184,50 +152,27 @@ const Water: React.FC = () => {
                   strokeWidth="1"
                 />
 
-                {/* Beautiful water fill with gradient - Animated */}
-                <Animated.View
-                  style={{
-                    position: 'absolute',
-                    left: x,
-                    top: barY,
-                    width: barWidth,
-                    height: barHeight,
-                    backgroundColor: waterColor,
-                    borderRadius: 4,
-                    opacity: animatedValues.current[index] || 0,
-                    transform: [{
-                      scaleY: (animatedValues.current[index] || new Animated.Value(0)).interpolate({
-                        inputRange: [0, 1],
-                        outputRange: [0, 1],
-                      })
-                    }],
-                    // Add beautiful shadow effect
-                    shadowColor: waterColor,
-                    shadowOffset: { width: 0, height: 2 },
-                    shadowOpacity: 0.3,
-                    shadowRadius: 4,
-                    elevation: 4,
-                  }}
+                {/* Beautiful water fill with solid color - Fixed */}
+                <Rect
+                  x={x}
+                  y={barY}
+                  width={barWidth}
+                  height={barHeight}
+                  fill={waterColor}
+                  rx={4}
+                  ry={4}
                 />
 
                 {/* Water surface highlight for realistic effect */}
-                <Animated.View
-                  style={{
-                    position: 'absolute',
-                    left: x + 2,
-                    top: barY + 2,
-                    width: barWidth - 4,
-                    height: 3,
-                    backgroundColor: '#FFFFFF',
-                    opacity: 0.4,
-                    borderRadius: 2,
-                    transform: [{
-                      scaleY: (animatedValues.current[index] || new Animated.Value(0)).interpolate({
-                        inputRange: [0, 1],
-                        outputRange: [0, 1],
-                      })
-                    }]
-                  }}
+                <Rect
+                  x={x + 2}
+                  y={barY + 2}
+                  width={barWidth - 4}
+                  height={3}
+                  fill="#FFFFFF"
+                  opacity={0.4}
+                  rx={2}
+                  ry={2}
                 />
 
                 {/* Day label - positioned to fit inside */}
@@ -257,18 +202,6 @@ const Water: React.FC = () => {
             );
           })}
         </Svg>
-
-        {/* Compact Legend */}
-        <View className="flex-row items-center justify-center mt-6 space-x-6">
-          <View className="flex-row items-center">
-            <View className="w-3 h-3 bg-blue-500 rounded mr-2" />
-            <Text className="text-xs text-gray-700 font-medium">Consumed</Text>
-          </View>
-          <View className="flex-row items-center">
-            <View className="w-3 h-3 bg-gray-100 rounded mr-2 border border-gray-300" />
-            <Text className="text-xs text-gray-700 font-medium">Empty Glass</Text>
-          </View>
-        </View>
       </View>
     </View>
   );
