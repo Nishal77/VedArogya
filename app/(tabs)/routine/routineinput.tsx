@@ -27,6 +27,8 @@ export default function RoutineInput() {
   const [activityDuration, setActivityDuration] = useState(15);
   const [activityIntensity, setActivityIntensity] = useState('Medium');
 
+
+
   const handleTimeChange = (event: any, selectedTime?: Date) => {
     if (selectedTime) {
       setWakeUpTime(selectedTime);
@@ -38,6 +40,8 @@ export default function RoutineInput() {
       setMealTime(selectedTime);
     }
   };
+
+
 
   const showTimePickerModal = () => {
     setShowTimePicker(true);
@@ -402,7 +406,7 @@ export default function RoutineInput() {
       </View>
 
       {/* Activity/Exercise Section */}
-      <View className="bg-white rounded-2xl p-4 border border-gray-200 shadow-sm">
+      <View className="bg-white rounded-2xl p-4 border border-gray-200 mb-4">
         {/* Header */}
         <View className="flex-row items-center mb-4">
           <Text className="text-lg font-bold text-gray-800">
@@ -488,7 +492,7 @@ export default function RoutineInput() {
                 onPress={() => setActivityIntensity(intensity)}
                 className={`flex-1 px-3 py-3 rounded-xl border ${
                   activityIntensity === intensity 
-                    ? 'bg-black/90 border-black' 
+                    ? 'bg-black/90 border-black/40' 
                     : 'bg-gray-100 border-gray-200'
                 }`}
                 activeOpacity={0.7}
@@ -503,6 +507,8 @@ export default function RoutineInput() {
           </View>
         </View>
       </View>
+
+
 
       {/* Wake Up Time Picker Popup Modal */}
       <Modal
@@ -649,6 +655,8 @@ export default function RoutineInput() {
           </View>
         </View>
       </Modal>
+
+
     </View>
   );
 }

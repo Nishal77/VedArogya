@@ -6,6 +6,10 @@ import Header from './header';
 import Hero from './hero';
 import RoutineInput from './routineinput';
 import SubmitButton from './submitButton';
+import DigestionTracker from './digestiontracker';
+import MoodTracker from './moodtracker';
+import EnvironmentTracker from './environmenttracker';
+import SleepTracker from './sleeptracker';
 
 export default function RoutineScreen() {
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -38,19 +42,25 @@ export default function RoutineScreen() {
       <ScrollView 
         className="flex-1"
         showsVerticalScrollIndicator={false}
-        contentContainerStyle={{ paddingBottom: 100 }}
+        contentContainerStyle={{ paddingBottom: 50 }}
       >
-        {/* Routine Input Section */}
-        <RoutineInput />
-        
-        {/* Additional content will go here */}
-        <View className="px-6 py-4">
-          <View className="items-center justify-center py-20">
-            <Text className="text-gray-500 text-lg">
-              More routine features coming soon...
-            </Text>
-          </View>
-        </View>
+                  {/* Routine Input Section */}
+          <RoutineInput />
+          
+          {/* Digestion Tracker Section */}
+          <DigestionTracker />
+          
+          {/* Mood Tracker Section */}
+          <MoodTracker />
+          
+          {/* Environment Tracker Section */}
+          <EnvironmentTracker />
+          
+          {/* Sleep Tracker Section */}
+          <SleepTracker />
+          
+          {/* Additional content will go here */}
+       
       </ScrollView>
 
       {/* Submit Button - Replaces Bottom Navbar */}
