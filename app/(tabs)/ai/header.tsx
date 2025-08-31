@@ -1,7 +1,7 @@
 import React from 'react';
-import { View, Text, TouchableOpacity, Image } from 'react-native';
+import { View, Text, TouchableOpacity } from 'react-native';
 import { useRouter } from 'expo-router';
-import { ArrowLeft } from 'lucide-react-native';
+import { ArrowLeft, Newspaper } from 'lucide-react-native';
 
 interface HeaderProps {
   onClearConversation?: () => void;
@@ -9,28 +9,27 @@ interface HeaderProps {
 
 export default function Header({ onClearConversation }: HeaderProps) {
   const router = useRouter();
-  const profileImageUrl = 'https://gdlpmqlqtfpcycqbmbmp.supabase.co/storage/v1/object/public/icons/_%20(9).jpeg';
 
-  const handleBack = () => {
-    // Clear conversation before navigating back
-    if (onClearConversation) {
-      onClearConversation();
-    }
-    
-    // Navigate back to home
+  const handleNewsPress = () => {
+    // Navigate to news section
+    router.push('/(tabs)/ai/news');
+  };
+
+  const handleBackPress = () => {
+    // Navigate to home page
     router.push('/(tabs)/home');
   };
 
   return (
     <View className="w-full flex-row items-center justify-between px-6 py-4 bg-white">
-      {/* Left Side - Back Button */}
+      {/* Left Side - Arrow Icon */}
       <TouchableOpacity
         testID="back-button"
-        onPress={handleBack}
+        onPress={handleBackPress}
         className="w-12 h-12 bg-gray-100 rounded-full items-center justify-center"
         activeOpacity={0.7}
       >
-        <ArrowLeft size={24} color="black" strokeWidth={2.5} />
+        <ArrowLeft size={24} color="#000000" strokeWidth={2.5} />
       </TouchableOpacity>
 
       {/* Center - Title */}
@@ -40,25 +39,17 @@ export default function Header({ onClearConversation }: HeaderProps) {
         </Text>
       </View>
 
-      {/* Right Side - Profile Only */}
-      <View className="flex-row items-center">
-        {/* Profile Image */}
-        <View
-          testID="profile-container"
-          className="w-12 h-12 rounded-full overflow-hidden border-2 border-gray-200"
-        >
-          <Image
-            testID="profile-image"
-            source={{
-              uri: profileImageUrl,
-              cache: 'reload'
-            }}
-            style={{ width: 48, height: 48 }}
-            onError={(error) => console.log('Image load error:', error)}
-            onLoad={() => console.log('Profile image loaded successfully')}
-          />
-        </View>
-      </View>
+      {/* Right Side - News Text Box */}
+      <TouchableOpacity
+        testID="news-button"
+        onPress={handleNewsPress}
+        className="flex-row items-center px-3 py-2 bg-gray-100 rounded-full"
+        activeOpacity={0.7}
+        style={{ minWidth: 60, justifyContent: 'center' }}
+      >
+        <Newspaper size={20} color="#2563EB" strokeWidth={2.2} style={{ marginRight: 6 }} />
+        <Text className="text-blue-700 font-semibold text-base">News</Text>
+      </TouchableOpacity>
     </View>
   );
 }
