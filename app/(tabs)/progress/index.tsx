@@ -2,17 +2,42 @@ import React from 'react';
 import { View, Text, ScrollView } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { BlurView } from 'expo-blur';
+import ProgressHeader from './header';
+import ProgressSubheading from './subheading';
+import ProgressGauge from './ProgressGauge';
+import MoodTracker from './MoodTracker';
+import Water from './Water';
 
 export default function Progress() {
   return (
     <SafeAreaView className="flex-1 bg-white">
+      {/* Fixed Header */}
+      <View className="h-2" />
+      <ProgressHeader />
+      
+      {/* Fixed Subheading */}
+      <ProgressSubheading />
+      
+      {/* Scrollable Content */}
       <ScrollView
         className="flex-1"
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{ paddingBottom: 120 }}
       >
-        {/* Top Spacing to prevent status bar overlap */}
-        <View className="h-4" />
+        {/* Intensity Gauge with 80% */}
+        <View className="py-0 mx-6">
+          <ProgressGauge value={80} />
+        </View>
+
+        {/* Mood Tracker */}
+        <View className="py-0 mx-6">
+          <MoodTracker />
+        </View>
+
+        {/* Water Intake Tracker */}
+        <View className="py-2 mx-6">
+          <Water />
+        </View>
         
         {/* Progress Section */}
         <View className="px-6 py-8">
