@@ -5,12 +5,19 @@ import { bookAppointment, prepareAppointmentData } from './appointmentService';
 interface AppointmentContextType {
   isBooking: boolean;
   handleBookAppointment: (selectedDate: Date, selectedTime: string, notes?: string) => Promise<void>;
+  refreshAppointments: () => void;
+  refreshTrigger: number;
 }
 
 const AppointmentContext = createContext<AppointmentContextType | undefined>(undefined);
 
 export function AppointmentProvider({ children }: { children: ReactNode }) {
   const [isBooking, setIsBooking] = useState(false);
+  const [refreshTrigger, setRefreshTrigger] = useState(0);
+
+  const refreshAppointments = () => {
+    setRefreshTrigger(prev => prev + 1);
+  };
 
   const handleBookAppointment = async (selectedDate: Date, selectedTime: string, notes?: string) => {
     if (!selectedDate || !selectedTime) {
@@ -28,6 +35,9 @@ export function AppointmentProvider({ children }: { children: ReactNode }) {
       const result = await bookAppointment(appointmentData);
 
       if (result.success) {
+        // Trigger refresh of appointments
+        refreshAppointments();
+        
         Alert.alert(
           'Appointment Booked!',
           `Your appointment has been successfully booked for ${selectedDate.toLocaleDateString()} at ${selectedTime}.`,
@@ -45,7 +55,7 @@ export function AppointmentProvider({ children }: { children: ReactNode }) {
   };
 
   return (
-    <AppointmentContext.Provider value={{ isBooking, handleBookAppointment }}>
+    <AppointmentContext.Provider value={{ isBooking, handleBookAppointment, refreshAppointments, refreshTrigger }}>
       {children}
     </AppointmentContext.Provider>
   );

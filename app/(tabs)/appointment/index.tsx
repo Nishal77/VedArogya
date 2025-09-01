@@ -34,67 +34,43 @@ export default function Appointment() {
       <ScrollView
         className="flex-1"
         showsVerticalScrollIndicator={false}
-        contentContainerStyle={{ paddingBottom: 20 }}
+        contentContainerStyle={{ paddingBottom: 30 }}
       >
         {/* Doctor Profile Hero */}
         <AppointmentHero />
         
         {/* Date Picker */}
-        <AppointmentDates 
-          selectedDate={selectedDate} 
-          onDateSelect={setSelectedDate} 
-        />
+        <View>
+          <AppointmentDates 
+            selectedDate={selectedDate} 
+            onDateSelect={setSelectedDate} 
+          />
+        </View>
         
         {/* Time Selection */}
-        <AppointmentTimes 
-          selectedTime={selectedTime} 
-          onTimeSelect={setSelectedTime} 
-        />
+        <View>
+          <AppointmentTimes 
+            selectedTime={selectedTime} 
+            onTimeSelect={setSelectedTime} 
+          />
+        </View>
 
         {/* Notes Input */}
-        <NotesInput 
-          notes={notes} 
-          onNotesChange={setNotes} 
-        />
+        <View>
+          <NotesInput 
+            notes={notes} 
+            onNotesChange={setNotes} 
+          />
+        </View>
 
-        {/* Recent Appointment */}
-        <AppointmentsList />
+        {/* Recent Appointments */}
+        <View>
+          <AppointmentsList />
+        </View>
       </ScrollView>
 
-
-
-      {/* Bottom Blur Effect - Seamless Smooth Transition */}
-      <View className="absolute bottom-24 left-0 right-0 h-2 z-40">
-        <BlurView 
-          intensity={40} 
-          tint="light"
-          className="flex-1"
-        />
-        {/* Seamless gradient overlay - no hard edges */}
-        <View className="absolute inset-0 bg-gradient-to-t from-white/40 via-white/25 via-white/15 to-transparent" />
-      </View>
-      
-      {/* Second Layer - Seamless Medium Blur */}
-      <View className="absolute bottom-20 left-0 right-0 h-2 z-40">
-        <BlurView 
-          intensity={20} 
-          tint="light"
-          className="flex-1"
-        />
-        {/* Seamless medium blur - smooth transition */}
-        <View className="absolute inset-0 bg-gradient-to-t from-white/20 via-white/12 via-white/6 to-transparent" />
-      </View>
-      
-      {/* Third Layer - Seamless Subtle Blur */}
-      <View className="absolute bottom-16 left-0 h-1 z-40">
-        <BlurView 
-          intensity={0} 
-          tint="light"
-          className="flex-1"
-        />
-        {/* Completely transparent - no visible lines */}
-        <View className="absolute inset-0 bg-transparent" />
-      </View>
+      {/* Simple bottom spacing for the Book Appointment button */}
+      <View className="h-20" />
     </SafeAreaView>
   );
 }

@@ -1,21 +1,20 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, TouchableOpacity, Image, ScrollView, RefreshControl } from 'react-native';
 import { ArrowUpRight, Cross, Phone, Star, Calendar, Clock, User, Plus, AlertCircle } from 'lucide-react-native';
-import { getUserAppointments, AppointmentWithUser, debugUserData } from '../../../utils/appointmentService';
+import { getUserAppointments, AppointmentWithUser } from '../../../utils/appointmentService';
 import { useRouter, useFocusEffect } from 'expo-router';
+import { useAppointment } from '../../../utils/AppointmentContext';
 
 export default function Appointment() {
   const [appointments, setAppointments] = useState<AppointmentWithUser[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const router = useRouter();
+  const { refreshTrigger } = useAppointment();
 
   const loadAppointments = async () => {
     try {
       console.log('Loading appointments...');
-      
-      // Debug user data first
-      await debugUserData();
       
       const result = await getUserAppointments();
       console.log('Appointments result:', result);
@@ -42,6 +41,13 @@ export default function Appointment() {
   useEffect(() => {
     loadAppointments();
   }, []);
+
+  // Listen for refresh trigger from context
+  useEffect(() => {
+    if (refreshTrigger > 0) {
+      loadAppointments();
+    }
+  }, [refreshTrigger]);
 
   // Refresh appointments when screen comes into focus
   useFocusEffect(
@@ -115,11 +121,11 @@ export default function Appointment() {
 
       {/* Appointments List */}
       {loading ? (
-        <View className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 items-center">
+        <View className="bg-white rounded-2xl p-6 border border-gray-100 items-center">
           <Text className="text-gray-600">Loading appointments...</Text>
         </View>
       ) : appointments.length === 0 ? (
-        <View className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
+        <View className="bg-white rounded-2xl p-6 border border-gray-100">
           <View className="items-center">
             <Calendar size={48} color="#9CA3AF" className="mb-4" />
             <Text className="text-lg font-semibold text-gray-800 mb-2">
@@ -147,7 +153,7 @@ export default function Appointment() {
           }
         >
           {appointments.slice(0, 1).map((appointment, index) => (
-            <View key={appointment.id} className="bg-white rounded-2xl p-4 shadow-sm border border-gray-100 mb-3">
+            <View key={appointment.id} className="bg-white rounded-2xl p-4 border border-gray-200 mb-3">
               <View className="flex-row items-start">
                 {/* Doctor Profile Picture */}
                 <View className="relative mr-4">
@@ -183,17 +189,7 @@ export default function Appointment() {
                   </Text>
                   <Text className="text-gray-500 text-sm">
                     Kayachikitsa Vaidya
-                  </Text>
-                  
-                  {/* Patient Info */}
-                  {appointment.user_name && (
-                    <View className="flex-row items-center mt-2">
-                      <User size={12} color="#6B7280" className="mr-1" />
-                      <Text className="text-gray-600 text-xs">
-                        {appointment.user_name}
-                      </Text>
-                    </View>
-                  )}
+                  </Text>                 
                 </View>
 
                 {/* Time and Navigation */}
@@ -206,7 +202,7 @@ export default function Appointment() {
                   
                   <TouchableOpacity 
                     onPress={() => router.push('/(tabs)/appointment')}
-                    className="flex-row items-center bg-gray-100 rounded-full px-3 py-2"
+                    className="flex-row items-center bg-gray-100 rounded-lg px-3 py-2"
                     activeOpacity={0.7}
                   >
                     <ArrowUpRight size={16} color="#3B82F6" />

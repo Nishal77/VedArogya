@@ -1,13 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, ScrollView, TouchableOpacity, RefreshControl, Alert } from 'react-native';
 import { Calendar, Clock, User, Phone, Mail, Trash2 } from 'lucide-react-native';
-import { getUserAppointments, cancelAppointment } from '../../../utils/appointmentService';
+import { getUserAppointments, cancelAppointment, deleteAppointment } from '../../../utils/appointmentService';
 import { AppointmentWithUser } from '../../../utils/appointmentService';
+import { useAppointment } from '../../../utils/AppointmentContext';
 
 export default function AppointmentsList() {
   const [appointments, setAppointments] = useState<AppointmentWithUser[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
+  const { refreshTrigger } = useAppointment();
 
   const loadAppointments = async () => {
     try {
@@ -33,6 +35,13 @@ export default function AppointmentsList() {
   useEffect(() => {
     loadAppointments();
   }, []);
+
+  // Listen for refresh trigger from context
+  useEffect(() => {
+    if (refreshTrigger > 0) {
+      loadAppointments();
+    }
+  }, [refreshTrigger]);
 
   const handleCancelAppointment = async (appointmentId: string) => {
     Alert.alert(
@@ -125,81 +134,109 @@ export default function AppointmentsList() {
       }
     >
       <View className="px-6 py-4">
-        <Text className="text-2xl font-bold text-gray-800 mb-4">
-          My Appointments
-        </Text>
+        <View className="flex-row items-center justify-between mb-4">
+          <Text className="text-lg font-bold text-gray-800">
+            My Appointments
+          </Text>
+          <View className="bg-gray-100 rounded-full px-3 py-1">
+            <Text className="text-sm font-medium text-gray-600">
+              {appointments.length} appointment{appointments.length !== 1 ? 's' : ''}
+            </Text>
+          </View>
+        </View>
         
-        {appointments.slice(0, 1).map((appointment) => (
-          <View key={appointment.id} className="bg-white rounded-xl shadow-sm border border-gray-200 p-4 mb-4">
+        {appointments.map((appointment) => (
+          <View key={appointment.id} className="bg-white rounded-xl border border-gray-200 p-4 mb-4">
             {/* Header with Status */}
-            <View className="flex-row justify-between items-start mb-3">
+            <View className="flex-row justify-between items-start mb-4">
               <View className="flex-1">
-                <Text className="text-lg font-semibold text-gray-800">
-                  Appointment #{appointment.id.slice(0, 8)}
-                </Text>
-                <Text className="text-sm text-gray-500">
+                <View className="flex-row items-center mb-1">
+                  <View className="w-2 h-2 bg-blue-500 rounded-full mr-2" />
+                  <Text className="text-sm font-semibold text-gray-800">
+                    Appointment #{appointment.id.slice(0, 8)}
+                  </Text>
+                </View>
+                <Text className="text-xs text-gray-500">
                   Booked on {formatDate(appointment.created_at)}
                 </Text>
               </View>
-              <View className={`px-2 py-1 rounded-full ${getStatusColor(appointment.status)}`}>
-                <Text className="text-xs font-medium">
+              <View className={`px-3 py-1.5 rounded-full ${getStatusColor(appointment.status)}`}>
+                <Text className="text-xs font-semibold">
                   {getStatusText(appointment.status)}
                 </Text>
               </View>
             </View>
 
             {/* Appointment Details */}
-            <View className="space-y-2 mb-4">
-              <View className="flex-row items-center">
-                <Calendar size={16} color="#6B7280" className="mr-2" />
-                <Text className="text-gray-700">
-                  {formatDate(appointment.appointment_date)}
-                </Text>
-              </View>
-              
-              <View className="flex-row items-center">
-                <Clock size={16} color="#6B7280" className="mr-2" />
-                <Text className="text-gray-700">
-                  {formatTime(appointment.appointment_time)}
-                </Text>
+            <View className="bg-gray-100 rounded-lg p-3 mb-4">
+              <View className="flex-row items-center justify-between">
+                <View className="flex-row items-center">
+                  <View className="w-8 h-8 bg-blue-100 rounded-lg items-center justify-center mr-3 border border-gray-100">
+                    <Calendar size={16} color="#3B82F6" />
+                  </View>
+                  <View>
+                    <Text className="text-xs text-gray-500 font-medium">Date</Text>
+                    <Text className="text-sm font-semibold text-gray-800">
+                      {formatDate(appointment.appointment_date)}
+                    </Text>
+                  </View>
+                </View>
+                
+                <View className="flex-row items-center">
+                  <View className="w-8 h-8 items-center justify-center mr-3 bg-green-100 rounded-lg border border-green-100 ">
+                    <Clock size={16} color="#10B981" />
+                  </View>
+                  <View>
+                    <Text className="text-xs text-gray-500 font-medium">Time</Text>
+                    <Text className="text-sm font-semibold text-gray-800">
+                      {formatTime(appointment.appointment_time)}
+                    </Text>
+                  </View>
+                </View>
               </View>
             </View>
 
             {/* User Details */}
-            <View className="bg-gray-50 rounded-lg p-3 mb-3">
-              <Text className="text-sm font-medium text-gray-800 mb-2">Patient Details</Text>
+            <View className="bg-gray-50 rounded-lg p-3 mb-4">
+              <View className="flex-row items-center mb-3">
+                <View className="w-6 h-6 bg-gray-200 rounded-full items-center justify-center mr-2">
+                  <User size={12} color="#6B7280" />
+                </View>
+                <Text className="text-sm font-semibold text-gray-800">Patient Details</Text>
+              </View>
               
-              <View className="space-y-1">
+              <View className="space-y-2">
                 <View className="flex-row items-center">
-                  <User size={14} color="#6B7280" className="mr-2" />
-                  <Text className="text-gray-700 text-sm">
-                    {appointment.user_name || 'N/A'}
-                  </Text>
+                  <Text className="text-sm text-gray-600 font-medium">Name:</Text>
+                  <Text className="text-sm font-semibold text-gray-800 ml-2">{appointment.user_name || 'N/A'}</Text>
                 </View>
                 
                 <View className="flex-row items-center">
-                  <Phone size={14} color="#6B7280" className="mr-2" />
-                  <Text className="text-gray-700 text-sm">
-                    {appointment.user_phone || 'N/A'}
-                  </Text>
+                  <Text className="text-sm text-gray-600 font-medium">Phone:</Text>
+                  <Text className="text-sm font-semibold text-gray-800 ml-2">{appointment.user_phone || 'N/A'}</Text>
                 </View>
                 
                 <View className="flex-row items-center">
-                  <Mail size={14} color="#6B7280" className="mr-2" />
-                  <Text className="text-gray-700 text-sm">
-                    {appointment.user_email || 'N/A'}
-                  </Text>
+                  <Text className="text-sm text-gray-600 font-medium">Email:</Text>
+                  <Text className="text-sm font-semibold text-gray-800 ml-2">{appointment.user_email || 'N/A'}</Text>
                 </View>
               </View>
             </View>
 
             {/* Notes */}
             {appointment.notes && (
-              <View className="mb-3">
-                <Text className="text-sm font-medium text-gray-800 mb-1">Notes</Text>
-                <Text className="text-gray-700 text-sm bg-yellow-50 p-2 rounded-lg">
-                  {appointment.notes}
-                </Text>
+              <View className="mb-4">
+                <View className="flex-row items-center mb-2">
+                  <View className="w-5 h-5 bg-yellow-100 rounded items-center justify-center mr-2">
+                    <Text className="text-yellow-600 text-xs font-bold">📝</Text>
+                  </View>
+                  <Text className="text-sm font-medium text-gray-800">Additional Notes</Text>
+                </View>
+                <View className="bg-yellow-50 border border-yellow-200 rounded-lg p-3">
+                  <Text className="text-gray-700 text-sm leading-5">
+                    {appointment.notes}
+                  </Text>
+                </View>
               </View>
             )}
 
@@ -207,11 +244,13 @@ export default function AppointmentsList() {
             {appointment.status === 'pending' && (
               <TouchableOpacity
                 onPress={() => handleCancelAppointment(appointment.id)}
-                className="flex-row items-center justify-center bg-red-50 border border-red-200 rounded-lg py-2"
+                className="flex-row items-center justify-center bg-red-50 border border-red-200 rounded-lg py-3"
                 activeOpacity={0.7}
               >
-                <Trash2 size={16} color="#DC2626" className="mr-2" />
-                <Text className="text-red-600 font-medium">Cancel Appointment</Text>
+                <View className="w-5 h-5 bg-red-100 rounded items-center justify-center mr-2">
+                  <Trash2 size={12} color="#DC2626" />
+                </View>
+                <Text className="text-red-600 font-semibold text-sm">Cancel Appointment</Text>
               </TouchableOpacity>
             )}
           </View>

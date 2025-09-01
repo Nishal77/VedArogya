@@ -195,7 +195,7 @@ export const updateAppointmentStatus = async (
   }
 };
 
-// Cancel appointment
+// Cancel appointment (mark as cancelled)
 export const cancelAppointment = async (appointmentId: string): Promise<{ success: boolean; error?: string }> => {
   try {
     const { error } = await supabase
@@ -215,6 +215,26 @@ export const cancelAppointment = async (appointmentId: string): Promise<{ succes
   } catch (error) {
     console.error('Error in cancelAppointment:', error);
     return { success: false, error: 'Failed to cancel appointment' };
+  }
+};
+
+// Delete appointment permanently from database
+export const deleteAppointment = async (appointmentId: string): Promise<{ success: boolean; error?: string }> => {
+  try {
+    const { error } = await supabase
+      .from('appointments')
+      .delete()
+      .eq('id', appointmentId);
+
+    if (error) {
+      console.error('Error deleting appointment:', error);
+      return { success: false, error: error.message };
+    }
+
+    return { success: true };
+  } catch (error) {
+    console.error('Error in deleteAppointment:', error);
+    return { success: false, error: 'Failed to delete appointment' };
   }
 };
 
