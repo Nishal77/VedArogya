@@ -1,8 +1,7 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { View, Text, TouchableOpacity, ScrollView } from 'react-native';
 
-export default function AppointmentTimes() {
-  const [selectedTime, setSelectedTime] = useState('9:00 AM');
+export default function AppointmentTimes({ selectedTime, onTimeSelect }) {
 
   // Generate time slots from 9:00 AM to 1:00 PM in 30-minute intervals
   const generateTimeSlots = () => {
@@ -40,7 +39,7 @@ export default function AppointmentTimes() {
   const timeSlots = generateTimeSlots();
 
   const handleTimeSelect = (time) => {
-    setSelectedTime(time);
+    onTimeSelect(time);
   };
 
   return (

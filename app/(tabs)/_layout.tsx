@@ -1,8 +1,9 @@
 import React from 'react';
 import { Tabs } from 'expo-router';
-import { TouchableOpacity, View, Text, Image } from 'react-native';
+import { TouchableOpacity, View, Text, Image, ActivityIndicator } from 'react-native';
 import { usePathname, useRouter } from 'expo-router';
 import Svg, { Path, G } from 'react-native-svg';
+import { useAppointment } from '../../utils/AppointmentContext';
 
 // Custom Home Icon Component using the home button image
 const HomeIcon = ({ size = 24, color = '#000000' }) => (
@@ -72,6 +73,7 @@ const UserIcon = ({ size = 24, color = '#000000' }) => (
 export default function TabLayout() {
   const pathname = usePathname();
   const router = useRouter();
+  const { isBooking, handleBookAppointment } = useAppointment();
 
   const isActive = (route: string) => {
     return pathname === route || pathname.startsWith(route);
@@ -195,16 +197,33 @@ export default function TabLayout() {
       {isOnAppointmentScreen && (
         <View className="absolute bottom-0 left-0 right-0 mx-4 mb-6 z-50">
           <TouchableOpacity 
-            className="bg-[#F4B400] rounded-full py-4 px-8 mb-3"
+            className={`rounded-full py-4 px-8 mb-3 ${
+              isBooking ? 'bg-gray-300' : 'bg-[#F4B400]'
+            }`}
             activeOpacity={0.8}
+            disabled={isBooking}
             onPress={() => {
-              // Handle booking appointment
-              console.log('Book Appointment pressed');
+              // Get the current appointment data from the appointment screen
+              const appointmentData = (global as any).appointmentData;
+              if (appointmentData) {
+                handleBookAppointment(appointmentData.selectedDate, appointmentData.selectedTime, appointmentData.notes);
+              } else {
+                console.log('No appointment data available');
+              }
             }}
           >
-            <Text className="text-black text-lg font-bold text-center">
-              Book Appointment
-            </Text>
+            {isBooking ? (
+              <View className="flex-row items-center justify-center">
+                <ActivityIndicator size="small" color="#000" className="mr-2" />
+                <Text className="text-black text-lg font-bold text-center">
+                  Booking...
+                </Text>
+              </View>
+            ) : (
+              <Text className="text-black text-lg font-bold text-center">
+                Book Appointment
+              </Text>
+            )}
           </TouchableOpacity>
         </View>
       )}

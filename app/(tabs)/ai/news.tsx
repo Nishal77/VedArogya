@@ -94,6 +94,7 @@ const News: React.FC = () => {
   };
 
   const handleBack = () => {
+    // Navigate back to AI input screen using router.back()
     router.back();
   };
 

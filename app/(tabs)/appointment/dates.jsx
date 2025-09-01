@@ -1,9 +1,8 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { View, Text, ScrollView, TouchableOpacity } from 'react-native';
 import { Clock } from 'lucide-react-native';
 
-export default function AppointmentDates() {
-  const [selectedDate, setSelectedDate] = useState(new Date());
+export default function AppointmentDates({ selectedDate, onDateSelect }) {
 
   // Generate 6 dates: today + 5 future dates
   const generateDates = () => {
@@ -55,7 +54,7 @@ export default function AppointmentDates() {
   };
 
   const handleDateSelect = (date) => {
-    setSelectedDate(date);
+    onDateSelect(date);
   };
 
   return (
