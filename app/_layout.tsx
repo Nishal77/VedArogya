@@ -5,6 +5,7 @@ import { LogBox } from "react-native";
 import { testSupabaseConnection } from "../utils/supabase";
 import { AuthProvider } from "../utils/AuthContext";
 import { AppointmentProvider } from "../utils/AppointmentContext";
+import { RoutineProvider } from "../utils/RoutineContext"; // Added
 import AuthWrapper from "../components/AuthWrapper";
 
 // Ignore specific warnings that are not critical
@@ -31,15 +32,17 @@ export default function RootLayout() {
   return (
     <AuthProvider>
       <AppointmentProvider>
-        <AuthWrapper>
-          <Stack screenOptions={{ headerShown: false }}>
-            <Stack.Screen name="index" options={{ title: 'Home' }} />
-            <Stack.Screen name="landing" options={{ title: 'Landing' }} />
-            <Stack.Screen name="about" options={{ title: 'About' }} />
-            <Stack.Screen name="(auth)" options={{ title: 'Authentication' }} />
-            <Stack.Screen name="(tabs)" options={{ title: 'Main App' }} />
-          </Stack>
-        </AuthWrapper>
+        <RoutineProvider> {/* Added */}
+          <AuthWrapper>
+            <Stack screenOptions={{ headerShown: false }}>
+              <Stack.Screen name="index" options={{ title: 'Home' }} />
+              <Stack.Screen name="landing" options={{ title: 'Landing' }} />
+              <Stack.Screen name="about" options={{ title: 'About' }} />
+              <Stack.Screen name="(auth)" options={{ title: 'Authentication' }} />
+              <Stack.Screen name="(tabs)" options={{ title: 'Main App' }} />
+            </Stack>
+          </AuthWrapper>
+        </RoutineProvider> {/* Added */}
       </AppointmentProvider>
     </AuthProvider>
   );
