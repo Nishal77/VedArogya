@@ -22,14 +22,19 @@ export default function LoginPage() {
       </div>
       <div className="bg-muted relative hidden lg:block">
         <Image
-          src="https://gdlpmqlqtfpcycqbmbmp.supabase.co/storage/v1/object/public/icons/img2.jpeg"
+          src="https://gdlpmqlqtfpcycqbmbmp.supabase.co/storage/v1/object/public/icons/Sanyasi%20baba.jpeg"
           alt="Sanyasi Baba - Ayurvedic Wisdom"
           fill
           className="object-cover"
           priority
         />
         <div className="absolute inset-0 bg-black/20"></div>
-       
+        <div className="absolute inset-0 flex items-center justify-center">
+          <div className="text-center text-white">
+            <h2 className="text-3xl font-bold mb-4">Welcome to VedaRogya</h2>
+            <p className="text-xl">Your comprehensive Ayurvedic healthcare management system</p>
+          </div>
+        </div>
       </div>
     </div>
   )
