@@ -465,7 +465,7 @@ export default function RoutineInput() {
               </Text>
               <Text className="text-sm text-gray-500">
                 min
-              </Text>
+        </Text>
             </View>
 
             {/* Increase Button */}
@@ -501,7 +501,7 @@ export default function RoutineInput() {
                   activityIntensity === intensity ? 'text-white' : 'text-gray-700'
                 }`}>
                   {intensity}
-                </Text>
+        </Text>
               </TouchableOpacity>
             ))}
           </View>
