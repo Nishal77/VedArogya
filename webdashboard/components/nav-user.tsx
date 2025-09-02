@@ -7,7 +7,6 @@ import {
   IconNotification,
   IconUserCircle,
 } from "@tabler/icons-react"
-import { useRouter } from "next/navigation"
 
 import {
   Avatar,
@@ -40,13 +39,6 @@ export function NavUser({
   }
 }) {
   const { isMobile } = useSidebar()
-  const router = useRouter()
-
-  const handleLogout = () => {
-    // Here you would typically clear authentication tokens/session
-    // For now, we'll just redirect to login
-    router.push("/login")
-  }
 
   return (
     <SidebarMenu>
@@ -106,7 +98,7 @@ export function NavUser({
               </DropdownMenuItem>
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
-            <DropdownMenuItem onClick={handleLogout}>
+            <DropdownMenuItem>
               <IconLogout />
               Log out
             </DropdownMenuItem>
