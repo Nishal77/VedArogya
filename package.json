@@ -1,22 +1,22 @@
 {
-    "name": "vedarogya-monorepo",
-    "private": true,
-    "workspaces": [
-        "apps/*",
-        "services/*",
-        "libs/*"
-    ],
-    "scripts": {
-        "dev:api": "pnpm --filter api-service dev",
-        "dev:ingest": "pnpm --filter ingest-service dev",
-        "dev:all": "concurrently \"pnpm --filter auth-service dev\" \"pnpm --filter ingest-service dev\"",
-        "prepare": "husky install"
-    },
-    "devDependencies": {
-        "concurrently": "^8.0.0",
-        "eslint": "^8.57.0",
-        "husky": "^8.0.0",
-        "prettier": "^3.2.5",
-        "prettier-plugin-tailwindcss": "^0.5.11"
-    }
+  "name": "vedarogya-monorepo",
+  "private": true,
+  "workspaces": [
+    "apps/*",
+    "services/*",
+    "libs/*"
+  ],
+  "scripts": {
+    "dev:api": "pnpm --filter api-service dev",
+    "dev:ingest": "pnpm --filter ingest-service dev",
+    "dev:all": "concurrently \"pnpm --filter auth-service dev\" \"pnpm --filter ingest-service dev\"",
+    "prepare": "husky install"
+  },
+  "devDependencies": {
+    "concurrently": "^8.0.0",
+    "eslint": "^8.57.0",
+    "husky": "^8.0.0",
+    "prettier": "^3.2.5",
+    "prettier-plugin-tailwindcss": "^0.5.11"
+  }
 }

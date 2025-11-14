@@ -1,14 +1,13 @@
 module.exports = {
-    root: true,
-    ignorePatterns: ["dist", "build", "node_modules"],
-    env: {
-      es2021: true,
-      node: true,
-    },
-    extends: ["eslint:recommended"],
-    parserOptions: {
-      ecmaVersion: "latest",
-      sourceType: "module",
-    },
-  }
-  
+  root: true,
+  ignorePatterns: ['dist', 'build', 'node_modules'],
+  env: {
+    es2021: true,
+    node: true,
+  },
+  extends: ['eslint:recommended'],
+  parserOptions: {
+    ecmaVersion: 'latest',
+    sourceType: 'module',
+  },
+}
