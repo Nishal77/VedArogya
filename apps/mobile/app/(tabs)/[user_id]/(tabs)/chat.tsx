@@ -1,7 +1,7 @@
 import { View, Text, ScrollView } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
-export default function PlusScreen() {
+export default function ChatScreen() {
   const insets = useSafeAreaInsets()
   const backgroundColor = '#F5F3EE'
 
@@ -24,7 +24,7 @@ export default function PlusScreen() {
             fontFamily: 'Satoshi-Medium',
           }}
         >
-          Create & Add
+          Videos & Media
         </Text>
         <Text
           className="text-base leading-6"
@@ -32,7 +32,7 @@ export default function PlusScreen() {
             color: '#6B7280',
           }}
         >
-          Log your health data, add notes, or create new entries.
+          Watch Ayurvedic videos, guided practices, and wellness content.
         </Text>
       </ScrollView>
     </View>

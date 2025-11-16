@@ -1,7 +1,7 @@
 import { View, Text, ScrollView } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
-export default function VideoScreen() {
+export default function AnalyticsScreen() {
   const insets = useSafeAreaInsets()
   const backgroundColor = '#F5F3EE'
 
@@ -24,7 +24,7 @@ export default function VideoScreen() {
             fontFamily: 'Satoshi-Medium',
           }}
         >
-          Videos & Media
+          Learn & Discover
         </Text>
         <Text
           className="text-base leading-6"
@@ -32,7 +32,7 @@ export default function VideoScreen() {
             color: '#6B7280',
           }}
         >
-          Watch Ayurvedic videos, guided practices, and wellness content.
+          Explore Ayurvedic knowledge, articles, and educational content.
         </Text>
       </ScrollView>
     </View>

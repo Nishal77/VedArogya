@@ -1,7 +1,7 @@
 import { View, Text, ScrollView } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
-export default function MonitorScreen() {
+export default function GuidanceScreen() {
   const insets = useSafeAreaInsets()
   const backgroundColor = '#F5F3EE'
 
@@ -24,7 +24,7 @@ export default function MonitorScreen() {
             fontFamily: 'Satoshi-Medium',
           }}
         >
-          Learn & Discover
+          Create & Add
         </Text>
         <Text
           className="text-base leading-6"
@@ -32,7 +32,7 @@ export default function MonitorScreen() {
             color: '#6B7280',
           }}
         >
-          Explore Ayurvedic knowledge, articles, and educational content.
+          Log your health data, add notes, or create new entries.
         </Text>
       </ScrollView>
     </View>

@@ -13,8 +13,57 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { LinearGradient } from 'expo-linear-gradient'
 import { useState } from 'react'
 
-const { width: SCREEN_WIDTH } = Dimensions.get('window')
+const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window')
+
+// Responsive size calculations
 const CARD_WIDTH = SCREEN_WIDTH - 48 // Full width minus padding
+const CARD_PADDING = Math.max(12, Math.min(16, SCREEN_WIDTH * 0.038))
+const CARD_TEXT_WIDTH = CARD_WIDTH - (CARD_PADDING * 2) // Text area width for full cards
+
+const getResponsiveSize = {
+  // Base sizes scaled by screen width (using 375 as base iPhone width)
+  scale: (size: number) => (SCREEN_WIDTH / 375) * size,
+  // Scale by height for vertical spacing
+  scaleHeight: (size: number) => (SCREEN_HEIGHT / 812) * size,
+  // Font sizes that adapt to card width (more accurate for text fitting)
+  fontSize: {
+    // Section header
+    sectionHeader: Math.max(20, Math.min(26, SCREEN_WIDTH * 0.068)),
+    sectionSubheader: Math.max(14, Math.min(18, SCREEN_WIDTH * 0.045)),
+    // Card title
+    cardTitle: Math.max(16, Math.min(20, CARD_TEXT_WIDTH * 0.05)),
+    // Card body text
+    cardBody: Math.max(14, Math.min(18, CARD_TEXT_WIDTH * 0.037)),
+    // Card link text
+    cardLink: Math.max(12, Math.min(15, CARD_TEXT_WIDTH * 0.032)),
+    // Modal header
+    modalHeader: Math.max(18, Math.min(22, SCREEN_WIDTH * 0.058)),
+    // Modal large title
+    modalLargeTitle: Math.max(24, Math.min(32, SCREEN_WIDTH * 0.085)),
+    // Modal body
+    modalBody: Math.max(14, Math.min(18, SCREEN_WIDTH * 0.045)),
+    // Modal section title
+    modalSectionTitle: Math.max(16, Math.min(20, SCREEN_WIDTH * 0.053)),
+    // Modal small text
+    modalSmall: Math.max(10, Math.min(13, SCREEN_WIDTH * 0.028)),
+    // Modal label (uppercase)
+    modalLabel: Math.max(9, Math.min(12, SCREEN_WIDTH * 0.025)),
+    // Modal balance title
+    modalBalanceTitle: Math.max(20, Math.min(26, SCREEN_WIDTH * 0.068)),
+  },
+  // Icon sizes
+  icon: {
+    card: Math.max(16, Math.min(20, SCREEN_WIDTH * 0.05)),
+    modal: Math.max(20, Math.min(24, SCREEN_WIDTH * 0.062)),
+    close: Math.max(18, Math.min(22, SCREEN_WIDTH * 0.055)),
+  },
+  // Spacing
+  spacing: {
+    cardPadding: CARD_PADDING,
+    cardPaddingLarge: Math.max(20, Math.min(28, SCREEN_WIDTH * 0.075)),
+    modalPadding: Math.max(20, Math.min(24, SCREEN_WIDTH * 0.064)),
+  },
+}
 
 export default function DailyAyurvedaGuidance() {
   const textColor = '#111827'
@@ -72,24 +121,42 @@ export default function DailyAyurvedaGuidance() {
     nextCheck: 'Check again tomorrow for updated guidance',
   }
 
+  const headerFontSize = getResponsiveSize.fontSize.sectionHeader
+  const subheaderFontSize = getResponsiveSize.fontSize.sectionSubheader
+  const cardTitleFontSize = getResponsiveSize.fontSize.cardTitle
+  const cardBodyFontSize = getResponsiveSize.fontSize.cardBody
+  const cardLinkFontSize = getResponsiveSize.fontSize.cardLink
+  const cardPadding = getResponsiveSize.spacing.cardPaddingLarge
+  const cardIconSize = getResponsiveSize.icon.card
+  const cardIconContainerSize = Math.max(28, Math.min(32, SCREEN_WIDTH * 0.085))
+
   return (
     <View className="mb-6 mt-8">
       <Text
-        className="mb-2 text-[24px]"
+        numberOfLines={2}
+        ellipsizeMode="tail"
         style={{
           fontFamily: 'Satoshi-Medium',
           fontWeight: '500',
           color: textColor,
+          fontSize: headerFontSize,
+          marginBottom: getResponsiveSize.scaleHeight(8),
+          lineHeight: headerFontSize * 1.2,
           letterSpacing: -0.4,
         }}
       >
         Daily Ayurveda Guidance
       </Text>
       <Text
-        className="mb-6 text-base leading-6"
+        numberOfLines={2}
+        ellipsizeMode="tail"
         style={{
           fontFamily: 'Satoshi-Medium',
+          fontWeight: '400',
           color: secondaryTextColor,
+          fontSize: subheaderFontSize,
+          marginBottom: getResponsiveSize.scaleHeight(24),
+          lineHeight: subheaderFontSize * 1.4,
           letterSpacing: 0.2,
         }}
       >
@@ -110,10 +177,10 @@ export default function DailyAyurvedaGuidance() {
           start={{ x: 0, y: 0 }}
           end={{ x: 1, y: 1 }}
           style={{
-            borderRadius: 24,
-            padding: 24,
-            paddingTop: 28,
-            paddingBottom: 28,
+            borderRadius: getResponsiveSize.scale(24),
+            padding: cardPadding,
+            paddingTop: cardPadding + 4,
+            paddingBottom: cardPadding + 4,
             shadowColor: '#D97706',
             shadowOffset: {
               width: 0,
@@ -127,13 +194,16 @@ export default function DailyAyurvedaGuidance() {
           }}
         >
           {/* Header */}
-          <View className="mb-6">
+          <View style={{ marginBottom: getResponsiveSize.scaleHeight(24) }}>
             <Text
-              className="text-lg"
+              numberOfLines={1}
+              ellipsizeMode="tail"
               style={{
                 fontFamily: 'Satoshi-Medium',
                 fontWeight: '600',
                 color: textColor,
+                fontSize: cardTitleFontSize,
+                lineHeight: cardTitleFontSize * 1.3,
                 letterSpacing: -0.2,
               }}
             >
@@ -143,12 +213,15 @@ export default function DailyAyurvedaGuidance() {
 
           {/* Message */}
           <Text
-            className="mb-6 text-base leading-7"
+            numberOfLines={4}
+            ellipsizeMode="tail"
             style={{
               fontFamily: 'Satoshi-Medium',
               fontWeight: '400',
               color: textColor,
-              lineHeight: 26,
+              fontSize: cardBodyFontSize,
+              marginBottom: getResponsiveSize.scaleHeight(24),
+              lineHeight: cardBodyFontSize * 1.5,
               letterSpacing: -0.1,
             }}
           >
@@ -158,19 +231,27 @@ export default function DailyAyurvedaGuidance() {
           {/* Arrow indicator */}
           <View className="flex-row items-center">
             <View
-              className="h-8 w-8 items-center justify-center rounded-full"
               style={{
+                width: cardIconContainerSize,
+                height: cardIconContainerSize,
+                alignItems: 'center',
+                justifyContent: 'center',
+                borderRadius: cardIconContainerSize / 2,
                 backgroundColor: 'rgba(255, 255, 255, 0.6)',
               }}
             >
-              <Ionicons name="arrow-forward" size={18} color="#D97706" />
+              <Ionicons name="arrow-forward" size={cardIconSize} color="#D97706" />
             </View>
             <Text
-              className="ml-3 text-sm"
+              numberOfLines={1}
+              ellipsizeMode="tail"
               style={{
                 fontFamily: 'Satoshi-Medium',
                 fontWeight: '600',
                 color: '#D97706',
+                fontSize: cardLinkFontSize,
+                marginLeft: 12,
+                lineHeight: cardLinkFontSize * 1.3,
                 letterSpacing: 0.2,
               }}
             >
@@ -202,16 +283,24 @@ export default function DailyAyurvedaGuidance() {
           >
             {/* Header */}
             <View
-              className="flex-row items-center justify-between border-b px-6 pb-5"
-              style={{ borderColor: '#F3F4F6' }}
+              className="flex-row items-center justify-between border-b"
+              style={{ 
+                borderColor: '#F3F4F6',
+                paddingHorizontal: getResponsiveSize.spacing.modalPadding,
+                paddingBottom: getResponsiveSize.scaleHeight(20),
+              }}
             >
               <View className="flex-1 flex-row items-center">
                 <LinearGradient
                   colors={['#FEF3C7', '#FDE68A']}
                   start={{ x: 0, y: 0 }}
                   end={{ x: 1, y: 1 }}
-                  className="h-12 w-12 items-center justify-center rounded-2xl"
                   style={{
+                    width: Math.max(44, Math.min(48, SCREEN_WIDTH * 0.128)),
+                    height: Math.max(44, Math.min(48, SCREEN_WIDTH * 0.128)),
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    borderRadius: getResponsiveSize.scale(16),
                     shadowColor: '#D97706',
                     shadowOffset: { width: 0, height: 4 },
                     shadowOpacity: 0.15,
@@ -219,14 +308,18 @@ export default function DailyAyurvedaGuidance() {
                     elevation: 4,
                   }}
                 >
-                  <Ionicons name="leaf" size={24} color="#D97706" />
+                  <Ionicons name="leaf" size={getResponsiveSize.icon.modal} color="#D97706" />
                 </LinearGradient>
                 <Text
-                  className="ml-3 text-xl"
+                  numberOfLines={1}
+                  ellipsizeMode="tail"
                   style={{
                     fontFamily: 'Satoshi-Medium',
                     fontWeight: '600',
                     color: textColor,
+                    fontSize: getResponsiveSize.fontSize.modalHeader,
+                    marginLeft: 12,
+                    lineHeight: getResponsiveSize.fontSize.modalHeader * 1.2,
                     letterSpacing: -0.4,
                   }}
                 >
@@ -235,8 +328,12 @@ export default function DailyAyurvedaGuidance() {
               </View>
               <TouchableOpacity
                 onPress={() => setIsExpanded(false)}
-                className="h-10 w-10 items-center justify-center rounded-full"
                 style={{
+                  width: Math.max(36, Math.min(40, SCREEN_WIDTH * 0.107)),
+                  height: Math.max(36, Math.min(40, SCREEN_WIDTH * 0.107)),
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  borderRadius: Math.max(36, Math.min(40, SCREEN_WIDTH * 0.107)) / 2,
                   backgroundColor: '#F9FAFB',
                   shadowColor: '#000',
                   shadowOffset: { width: 0, height: 2 },
@@ -245,22 +342,27 @@ export default function DailyAyurvedaGuidance() {
                   elevation: 2,
                 }}
               >
-                <Ionicons name="close" size={22} color={textColor} />
+                <Ionicons name="close" size={getResponsiveSize.icon.close} color={textColor} />
               </TouchableOpacity>
             </View>
 
             {/* Content */}
             <ScrollView
               className="flex-1"
-              contentContainerStyle={{ padding: 24, paddingBottom: 40 }}
+              contentContainerStyle={{ 
+                padding: getResponsiveSize.spacing.modalPadding, 
+                paddingBottom: getResponsiveSize.scaleHeight(40) 
+              }}
               showsVerticalScrollIndicator={false}
             >
               {/* Current State */}
               <LinearGradient
                 colors={['#FFFBEB', '#FEF3C7', '#FDE68A']}
                 locations={[0, 0.5, 1]}
-                className="mb-6 rounded-3xl p-6"
                 style={{
+                  marginBottom: getResponsiveSize.scaleHeight(24),
+                  borderRadius: getResponsiveSize.scale(24),
+                  padding: getResponsiveSize.spacing.modalPadding,
                   shadowColor: '#D97706',
                   shadowOffset: { width: 0, height: 4 },
                   shadowOpacity: 0.1,
@@ -271,35 +373,45 @@ export default function DailyAyurvedaGuidance() {
                 }}
               >
                 <Text
-                  className="mb-3 text-xs"
+                  numberOfLines={1}
+                  ellipsizeMode="tail"
                   style={{
                     fontFamily: 'Satoshi-Medium',
                     fontWeight: '600',
                     color: '#D97706',
+                    fontSize: getResponsiveSize.fontSize.modalLabel,
+                    marginBottom: getResponsiveSize.scaleHeight(12),
                     textTransform: 'uppercase',
+                    lineHeight: getResponsiveSize.fontSize.modalLabel * 1.3,
                     letterSpacing: 1,
                   }}
                 >
                   Current State
                 </Text>
                 <Text
-                  className="mb-3 text-3xl"
+                  numberOfLines={1}
+                  ellipsizeMode="tail"
                   style={{
                     fontFamily: 'Satoshi-Medium',
                     fontWeight: '700',
                     color: textColor,
+                    fontSize: getResponsiveSize.fontSize.modalLargeTitle,
+                    marginBottom: getResponsiveSize.scaleHeight(12),
+                    lineHeight: getResponsiveSize.fontSize.modalLargeTitle * 1.2,
                     letterSpacing: -0.5,
                   }}
                 >
                   {doshaInsights.currentState}
                 </Text>
                 <Text
-                  className="text-base leading-7"
+                  numberOfLines={5}
+                  ellipsizeMode="tail"
                   style={{
                     fontFamily: 'Satoshi-Medium',
                     fontWeight: '400',
                     color: textColor,
-                    lineHeight: 26,
+                    fontSize: getResponsiveSize.fontSize.modalBody,
+                    lineHeight: getResponsiveSize.fontSize.modalBody * 1.5,
                     letterSpacing: -0.1,
                   }}
                 >
@@ -311,26 +423,35 @@ export default function DailyAyurvedaGuidance() {
               {doshaInsights.recommendations.map((section, index) => (
                 <View
                   key={index}
-                  className="mb-6"
                   style={{
+                    marginBottom: getResponsiveSize.scaleHeight(24),
                     backgroundColor: '#FAFAFA',
-                    borderRadius: 20,
-                    padding: 20,
+                    borderRadius: getResponsiveSize.scale(20),
+                    padding: getResponsiveSize.spacing.modalPadding,
                     borderWidth: 1,
                     borderColor: '#F3F4F6',
                   }}
                 >
                   <View className="mb-4 flex-row items-center">
                     <View
-                      className="mr-3 h-6 w-1 rounded-full"
-                      style={{ backgroundColor: '#D97706' }}
+                      style={{
+                        width: 4,
+                        height: Math.max(20, Math.min(24, SCREEN_WIDTH * 0.064)),
+                        borderRadius: 2,
+                        marginRight: 12,
+                        backgroundColor: '#D97706',
+                      }}
                     />
                     <Text
-                      className="flex-1 text-lg"
+                      numberOfLines={1}
+                      ellipsizeMode="tail"
                       style={{
                         fontFamily: 'Satoshi-Medium',
                         fontWeight: '600',
                         color: textColor,
+                        fontSize: getResponsiveSize.fontSize.modalSectionTitle,
+                        flex: 1,
+                        lineHeight: getResponsiveSize.fontSize.modalSectionTitle * 1.3,
                         letterSpacing: -0.3,
                       }}
                     >
@@ -338,23 +459,42 @@ export default function DailyAyurvedaGuidance() {
                     </Text>
                   </View>
                   {section.items.map((item, itemIndex) => (
-                    <View key={itemIndex} className="mb-3 flex-row items-start">
+                    <View 
+                      key={itemIndex} 
+                      className="flex-row items-start"
+                      style={{ marginBottom: getResponsiveSize.scaleHeight(12) }}
+                    >
                       <View
-                        className="mr-3 mt-0.5 h-6 w-6 items-center justify-center rounded-full"
-                        style={{ backgroundColor: 'rgba(217, 119, 6, 0.1)' }}
+                        style={{
+                          width: Math.max(20, Math.min(24, SCREEN_WIDTH * 0.064)),
+                          height: Math.max(20, Math.min(24, SCREEN_WIDTH * 0.064)),
+                          marginRight: 12,
+                          marginTop: 2,
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          borderRadius: Math.max(20, Math.min(24, SCREEN_WIDTH * 0.064)) / 2,
+                          backgroundColor: 'rgba(217, 119, 6, 0.1)',
+                        }}
                       >
                         <View
-                          className="h-2 w-2 rounded-full"
-                          style={{ backgroundColor: '#D97706' }}
+                          style={{
+                            width: Math.max(6, Math.min(8, SCREEN_WIDTH * 0.021)),
+                            height: Math.max(6, Math.min(8, SCREEN_WIDTH * 0.021)),
+                            borderRadius: Math.max(6, Math.min(8, SCREEN_WIDTH * 0.021)) / 2,
+                            backgroundColor: '#D97706',
+                          }}
                         />
                       </View>
                       <Text
-                        className="flex-1 text-base leading-7"
+                        numberOfLines={3}
+                        ellipsizeMode="tail"
                         style={{
                           fontFamily: 'Satoshi-Medium',
                           fontWeight: '400',
                           color: textColor,
-                          lineHeight: 26,
+                          fontSize: getResponsiveSize.fontSize.modalBody,
+                          flex: 1,
+                          lineHeight: getResponsiveSize.fontSize.modalBody * 1.5,
                           letterSpacing: -0.1,
                         }}
                       >
@@ -369,8 +509,10 @@ export default function DailyAyurvedaGuidance() {
               <LinearGradient
                 colors={['#F0FDF4', '#DCFCE7', '#BBF7D0']}
                 locations={[0, 0.5, 1]}
-                className="mb-6 rounded-3xl p-6"
                 style={{
+                  marginBottom: getResponsiveSize.scaleHeight(24),
+                  borderRadius: getResponsiveSize.scale(24),
+                  padding: getResponsiveSize.spacing.modalPadding,
                   shadowColor: '#16A34A',
                   shadowOffset: { width: 0, height: 4 },
                   shadowOpacity: 0.1,
@@ -381,34 +523,45 @@ export default function DailyAyurvedaGuidance() {
                 }}
               >
                 <Text
-                  className="mb-3 text-xs"
+                  numberOfLines={1}
+                  ellipsizeMode="tail"
                   style={{
                     fontFamily: 'Satoshi-Medium',
                     fontWeight: '600',
                     color: '#16A34A',
+                    fontSize: getResponsiveSize.fontSize.modalLabel,
+                    marginBottom: getResponsiveSize.scaleHeight(12),
                     textTransform: 'uppercase',
+                    lineHeight: getResponsiveSize.fontSize.modalLabel * 1.3,
                     letterSpacing: 1,
                   }}
                 >
                   Balance Status
                 </Text>
                 <Text
-                  className="mb-3 text-2xl"
+                  numberOfLines={1}
+                  ellipsizeMode="tail"
                   style={{
                     fontFamily: 'Satoshi-Medium',
                     fontWeight: '700',
                     color: '#16A34A',
+                    fontSize: getResponsiveSize.fontSize.modalBalanceTitle,
+                    marginBottom: getResponsiveSize.scaleHeight(12),
+                    lineHeight: getResponsiveSize.fontSize.modalBalanceTitle * 1.2,
                     letterSpacing: -0.4,
                   }}
                 >
                   {doshaInsights.balance}
                 </Text>
                 <Text
-                  className="text-sm"
+                  numberOfLines={2}
+                  ellipsizeMode="tail"
                   style={{
                     fontFamily: 'Satoshi-Medium',
                     fontWeight: '400',
                     color: secondaryTextColor,
+                    fontSize: getResponsiveSize.fontSize.modalSmall,
+                    lineHeight: getResponsiveSize.fontSize.modalSmall * 1.4,
                     letterSpacing: 0.1,
                   }}
                 >
