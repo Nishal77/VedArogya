@@ -1,8 +1,9 @@
 import { Tabs } from 'expo-router'
-import { View, TouchableOpacity } from 'react-native'
+import { View, TouchableOpacity, Platform } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { usePathname, useRouter } from 'expo-router'
 import { LinearGradient } from 'expo-linear-gradient'
+import { BlurView } from 'expo-blur'
 import Svg, { Path, Circle } from 'react-native-svg'
 
 // Custom Home Icon Component
@@ -209,7 +210,7 @@ function CustomTabBar() {
           'rgba(245, 243, 238, 0.2)',
           'rgba(245, 243, 238, 0.5)',
           'rgba(245, 243, 238, 0.8)',
-          '#F7F3EC',
+          '#F5F3EE',
         ]}
         locations={[0, 0.3, 0.6, 0.85, 1]}
         style={{
@@ -224,58 +225,97 @@ function CustomTabBar() {
         }}
       />
 
-      {/* Navigation Bar */}
+      {/* Navigation Bar with Frosted Glass Effect */}
       <View
         style={{
           position: 'absolute',
           bottom: 0,
           left: 0,
           right: 0,
-          paddingBottom: insets.bottom,
-          paddingTop: 20,
-          paddingHorizontal: 20,
-          backgroundColor: '#F7F3EC',
+          overflow: 'hidden',
           zIndex: 2,
         }}
       >
+        {/* Blur Background */}
+        <BlurView
+          intensity={Platform.OS === 'ios' ? 80 : 50}
+          tint="light"
+          style={{
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+          }}
+        />
+        
+        {/* Degradable Gradient Overlay - More opaque at bottom, transparent at top */}
+        <LinearGradient
+          colors={[
+            'rgba(255, 255, 255, 0)',
+            'rgba(255, 255, 255, 0.2)',
+            'rgba(255, 255, 255, 0.4)',
+            'rgba(255, 255, 255, 0.6)',
+            'rgba(255, 255, 255, 0.75)',
+            'rgba(255, 255, 255, 0.85)',
+          ]}
+          locations={[0, 0.3, 0.5, 0.7, 0.85, 1]}
+          style={{
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+          }}
+        />
+
+        {/* Content Container */}
         <View
           style={{
-            flexDirection: 'row',
-            alignItems: 'center',
-            justifyContent: 'space-around',
+            paddingBottom: insets.bottom,
+            paddingTop: 20,
+            paddingHorizontal: 20,
           }}
         >
-          {tabs.map((tab) => {
-            const isActive =
-              activeTab === tab.route || (activeTab === 'home' && tab.isHome)
-            const iconColor = isActive ? '#111827' : '#9CA3AF'
+          <View
+            style={{
+              flexDirection: 'row',
+              alignItems: 'center',
+              justifyContent: 'space-around',
+            }}
+          >
+            {tabs.map((tab) => {
+              const isActive =
+                activeTab === tab.route || (activeTab === 'home' && tab.isHome)
+              const iconColor = isActive ? '#111827' : '#9CA3AF'
 
-            return (
-              <TouchableOpacity
-                key={tab.name}
-                activeOpacity={0.7}
-                onPress={() => handlePress(tab)}
-                style={{
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  paddingVertical: 8,
-                  paddingHorizontal: 16,
-                }}
-              >
-                {tab.name === 'home' ? (
-                  <HomeIcon color={iconColor} size={26} />
-                ) : tab.name === 'analytics' ? (
-                  <ActivityIcon color={iconColor} size={26} />
-                ) : tab.name === 'guidance' ? (
-                  <AchievementsIcon color={iconColor} size={26} />
-                ) : tab.name === 'chat' ? (
-                  <BubblesIcon color={iconColor} size={26} />
-                ) : tab.name === 'profile' ? (
-                  <ProfileIcon color={iconColor} size={26} />
-                ) : null}
-              </TouchableOpacity>
-            )
-          })}
+              return (
+                <TouchableOpacity
+                  key={tab.name}
+                  activeOpacity={0.7}
+                  onPress={() => handlePress(tab)}
+                  style={{
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    paddingVertical: 8,
+                    paddingHorizontal: 16,
+                  }}
+                >
+                  {tab.name === 'home' ? (
+                    <HomeIcon color={iconColor} size={26} />
+                  ) : tab.name === 'analytics' ? (
+                    <ActivityIcon color={iconColor} size={26} />
+                  ) : tab.name === 'guidance' ? (
+                    <AchievementsIcon color={iconColor} size={26} />
+                  ) : tab.name === 'chat' ? (
+                    <BubblesIcon color={iconColor} size={26} />
+                  ) : tab.name === 'profile' ? (
+                    <ProfileIcon color={iconColor} size={26} />
+                  ) : null}
+                </TouchableOpacity>
+              )
+            })}
+          </View>
         </View>
       </View>
     </>

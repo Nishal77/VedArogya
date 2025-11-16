@@ -7,10 +7,10 @@ const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window')
 
 // Responsive size calculations
 const CARD_WIDTH = SCREEN_WIDTH - 48 // Full width minus padding
-const CARD_GAP = Math.max(8, Math.min(12, SCREEN_WIDTH * 0.032))
+const CARD_GAP = Math.max(6, Math.min(10, SCREEN_WIDTH * 0.026))
 const CARD_ITEM_WIDTH = (CARD_WIDTH - CARD_GAP * 2) / 2 // 2 columns with gap
 const CARD_PADDING = Math.max(12, Math.min(16, SCREEN_WIDTH * 0.038))
-const AVAILABLE_TEXT_WIDTH = CARD_ITEM_WIDTH - (CARD_PADDING * 2) // Text area width
+const AVAILABLE_TEXT_WIDTH = CARD_ITEM_WIDTH - CARD_PADDING * 2 // Text area width
 
 const getResponsiveSize = {
   // Base sizes scaled by screen width (using 375 as base iPhone width)
@@ -38,8 +38,8 @@ const getResponsiveSize = {
   spacing: {
     cardPadding: CARD_PADDING,
     cardGap: CARD_GAP,
-    cardMargin: Math.max(6, Math.min(8, SCREEN_WIDTH * 0.02)),
-    sectionGap: Math.max(12, Math.min(16, SCREEN_WIDTH * 0.04)),
+    cardMargin: Math.max(4, Math.min(6, SCREEN_WIDTH * 0.016)),
+    sectionGap: Math.max(8, Math.min(12, SCREEN_WIDTH * 0.03)),
   },
 }
 
@@ -72,9 +72,9 @@ function HealthCard({
   const titleFontSize = getResponsiveSize.fontSize.title
   const valueFontSize = getResponsiveSize.fontSize.value
   const subtitleFontSize = getResponsiveSize.fontSize.subtitle
-  
+
   const CardContent = (
-      <View
+    <View
       style={{
         width: CARD_ITEM_WIDTH,
         borderRadius: getResponsiveSize.scale(20),
@@ -82,12 +82,12 @@ function HealthCard({
         marginBottom: getResponsiveSize.spacing.sectionGap,
         backgroundColor: '#FFFFFF',
         borderWidth: 0.5,
-        borderColor: '#F0F0F0',
+        borderColor: 'rgba(0, 0, 0, 0.08)', // Light visible border
         shadowColor: '#000',
-        shadowOffset: { width: 0, height: 1 },
-        shadowOpacity: 0.04,
+        shadowOffset: { width: 0, height: 3 },
+        shadowOpacity: 0.1,
         shadowRadius: 12,
-        elevation: 1,
+        elevation: 3,
       }}
     >
       <LinearGradient
@@ -175,7 +175,7 @@ function HealthCard({
 
           {/* Tap to log */}
           {!value && !isReadOnly && (
-            <View 
+            <View
               className="flex-row items-center"
               style={{ marginTop: getResponsiveSize.scaleHeight(10) }}
             >
@@ -251,12 +251,13 @@ export default function DailyHealthCheckIn() {
   return (
     <View
       style={{
-        marginBottom: getResponsiveSize.scaleHeight(24),
+        marginBottom: getResponsiveSize.scaleHeight(16),
+        marginTop: 24,
         width: CARD_WIDTH,
       }}
     >
       {/* Header */}
-      <View style={{ marginBottom: getResponsiveSize.scaleHeight(16) }}>
+      <View style={{ marginBottom: getResponsiveSize.scaleHeight(12) }}>
         <Text
           numberOfLines={2}
           ellipsizeMode="tail"
@@ -270,7 +271,7 @@ export default function DailyHealthCheckIn() {
             letterSpacing: -0.3,
           }}
         >
-          Today's Health Overview Cards
+          Your Daily Check-Ins
         </Text>
         <Text
           numberOfLines={1}
@@ -279,13 +280,13 @@ export default function DailyHealthCheckIn() {
             fontFamily: 'Satoshi-Medium',
             fontWeight: '400',
             color: secondaryTextColor,
-            textTransform: 'uppercase',
-            letterSpacing: 0.5,
-            fontSize: headerSubFontSize,
+            letterSpacing: 0.1,
+            fontSize: Math.max(14, Math.min(16, SCREEN_WIDTH * 0.043)),
             marginBottom: getResponsiveSize.scaleHeight(4),
+            lineHeight: Math.max(14, Math.min(16, SCREEN_WIDTH * 0.043)) * 1.4,
           }}
         >
-          Manual Tracking Only
+    Quick entries for a clearer day.
         </Text>
       </View>
 

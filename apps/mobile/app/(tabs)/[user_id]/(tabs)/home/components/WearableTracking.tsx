@@ -1,18 +1,19 @@
-import { Text, View, TouchableOpacity, Dimensions } from 'react-native'
+import { Text, View, TouchableOpacity, Dimensions, Platform } from 'react-native'
 import { useFonts } from 'expo-font'
 import { Ionicons } from '@expo/vector-icons'
 import { LinearGradient } from 'expo-linear-gradient'
+import { BlurView } from 'expo-blur'
 import Svg, { Polyline, Path, Circle, Ellipse } from 'react-native-svg'
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window')
 
-// Responsive size calculations
-const CARD_GAP = Math.max(8, Math.min(12, SCREEN_WIDTH * 0.032))
+// Responsive size calculations - Reduced gap for tighter layout
+const CARD_GAP = Math.max(6, Math.min(10, SCREEN_WIDTH * 0.026))
 const FULL_CARD_WIDTH = SCREEN_WIDTH - 48 // Full width minus padding
 const CARD_WIDTH = (SCREEN_WIDTH - 48 - CARD_GAP) / 2 // 2 columns with gap
 const CARD_PADDING = Math.max(12, Math.min(16, SCREEN_WIDTH * 0.038))
-const AVAILABLE_TEXT_WIDTH = CARD_WIDTH - (CARD_PADDING * 2) // Text area width for small cards
-const FULL_CARD_TEXT_WIDTH = FULL_CARD_WIDTH - (CARD_PADDING * 2) // Text area width for full cards
+const AVAILABLE_TEXT_WIDTH = CARD_WIDTH - CARD_PADDING * 2 // Text area width for small cards
+const FULL_CARD_TEXT_WIDTH = FULL_CARD_WIDTH - CARD_PADDING * 2 // Text area width for full cards
 
 const getResponsiveSize = {
   // Base sizes scaled by screen width (using 375 as base iPhone width)
@@ -88,12 +89,17 @@ function HealthCard({
 
   return (
     <View
-      className="rounded-2xl overflow-hidden"
+      className="overflow-hidden rounded-2xl"
       style={{
         width: CARD_WIDTH,
         backgroundColor: '#FFFFFF',
         borderWidth: 0.5,
-        borderColor: '#F0F0F0',
+        borderColor: 'rgba(0, 0, 0, 0.08)', // Light visible border
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.1,
+        shadowRadius: 12,
+        elevation: 4,
       }}
     >
       <LinearGradient
@@ -174,7 +180,10 @@ function HealthCard({
       </View>
 
       {/* Header */}
-      <View className="mb-2 flex-row items-center justify-between" style={{ position: 'relative', zIndex: 1 }}>
+        <View
+          className="mb-2 flex-row items-center justify-between"
+          style={{ position: 'relative', zIndex: 1 }}
+        >
         <View className="flex-row items-center" style={{ flex: 1 }}>
           <View
             style={{
@@ -205,7 +214,10 @@ function HealthCard({
             {title}
           </Text>
         </View>
-        <TouchableOpacity activeOpacity={0.7} style={{ alignItems: 'center', justifyContent: 'center', marginLeft: 4 }}>
+          <TouchableOpacity
+            activeOpacity={0.7}
+            style={{ alignItems: 'center', justifyContent: 'center', marginLeft: 4 }}
+          >
           <Svg width={16} height={16} viewBox="0 0 24 24" fill="none">
             <Path
               d="M7 7h10v10"
@@ -226,7 +238,15 @@ function HealthCard({
       </View>
 
       {/* Graph - Always show */}
-      <View className="mb-2 flex-1" style={{ height: 50, position: 'relative', zIndex: 1, justifyContent: 'center' }}>
+        <View
+          className="mb-2 flex-1"
+          style={{
+            height: 50,
+            position: 'relative',
+            zIndex: 1,
+            justifyContent: 'center',
+          }}
+        >
         <Svg width="100%" height={50} viewBox="0 0 200 50">
           {showGraph ? (
             // Heart Rate style - smooth wave
@@ -369,13 +389,17 @@ function HealthScoreCard() {
 
   return (
     <View
-      className="rounded-2xl overflow-hidden"
+      className="overflow-hidden rounded-2xl"
       style={{
         width: FULL_CARD_WIDTH,
         backgroundColor: '#FFFFFF',
         borderWidth: 0.5,
-        borderColor: '#F0F0F0',
-        marginBottom: 12,
+        borderColor: 'rgba(0, 0, 0, 0.08)', // Light visible border
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.1,
+        shadowRadius: 12,
+        elevation: 4,
       }}
     >
       <LinearGradient
@@ -412,17 +436,32 @@ function HealthScoreCard() {
       </View>
 
       {/* Header */}
-      <View className="mb-3 flex-row items-center justify-between" style={{ position: 'relative', zIndex: 1 }}>
+        <View
+          className="mb-3 flex-row items-center justify-between"
+          style={{ position: 'relative', zIndex: 1 }}
+        >
         <View className="flex-row items-center">
-          {/* White circle with heart icon */}
+          {/* White circle with heart icon - with subtle blur */}
           <View
-            className="h-8 w-8 items-center justify-center rounded-full"
+            className="h-8 w-8 items-center justify-center rounded-full overflow-hidden"
             style={{
-              backgroundColor: '#FFFFFF',
               borderWidth: 1,
               borderColor: '#E5E7EB',
             }}
           >
+            <BlurView
+              intensity={Platform.OS === 'ios' ? 15 : 10}
+              tint="light"
+              style={{
+                position: 'absolute',
+                top: 0,
+                left: 0,
+                right: 0,
+                bottom: 0,
+                backgroundColor: 'rgba(255, 255, 255, 0.8)',
+              }}
+            />
+            <View style={{ position: 'relative', zIndex: 1 }}>
             <Svg width={16} height={16} viewBox="0 0 24 24" fill="none">
               {/* Heart shape */}
               <Path
@@ -443,6 +482,7 @@ function HealthScoreCard() {
                 strokeLinejoin="round"
               />
             </Svg>
+            </View>
           </View>
           <Text
             numberOfLines={1}
@@ -461,8 +501,23 @@ function HealthScoreCard() {
           </Text>
         </View>
         <View className="flex-row items-center" style={{ gap: 8 }}>
-          {/* Status Pill */}
-          <View className="rounded-full px-2.5 py-1" style={{ backgroundColor: '#16A34A' }}>
+          {/* Status Pill - with subtle blur */}
+          <View
+            className="rounded-full px-2.5 py-1 overflow-hidden"
+            style={{ position: 'relative' }}
+          >
+            <BlurView
+              intensity={Platform.OS === 'ios' ? 12 : 8}
+              tint="light"
+              style={{
+                position: 'absolute',
+                top: 0,
+                left: 0,
+                right: 0,
+                bottom: 0,
+                backgroundColor: 'rgba(22, 163, 74, 0.9)',
+              }}
+            />
             <Text
               numberOfLines={1}
               ellipsizeMode="tail"
@@ -471,12 +526,17 @@ function HealthScoreCard() {
                 fontWeight: '500',
                 color: '#FFFFFF',
                 fontSize: subtitleFontSize,
+                position: 'relative',
+                zIndex: 1,
               }}
             >
               You are Good!
             </Text>
           </View>
-          <TouchableOpacity activeOpacity={0.7} style={{ alignItems: 'center', justifyContent: 'center' }}>
+            <TouchableOpacity
+              activeOpacity={0.7}
+              style={{ alignItems: 'center', justifyContent: 'center' }}
+            >
             <Svg width={16} height={16} viewBox="0 0 24 24" fill="none">
               <Path
                 d="M7 7h10v10"
@@ -498,7 +558,10 @@ function HealthScoreCard() {
       </View>
 
       {/* Main Content */}
-      <View className="mb-3 flex-row items-center justify-between" style={{ position: 'relative', zIndex: 1 }}>
+        <View
+          className="mb-3 flex-row items-center justify-between"
+          style={{ position: 'relative', zIndex: 1 }}
+        >
         <Text
           numberOfLines={1}
           ellipsizeMode="tail"
@@ -599,12 +662,17 @@ function FullWidthHealthCard({
 
   return (
     <View
-      className="rounded-2xl overflow-hidden"
+      className="overflow-hidden rounded-2xl"
       style={{
         width: FULL_CARD_WIDTH,
         backgroundColor: '#FFFFFF',
         borderWidth: 0.5,
-        borderColor: '#F0F0F0',
+        borderColor: 'rgba(0, 0, 0, 0.08)', // Light visible border
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 3 },
+        shadowOpacity: 0.12,
+        shadowRadius: 7,
+        elevation: 3,
       }}
     >
       <LinearGradient
@@ -620,6 +688,7 @@ function FullWidthHealthCard({
       {/* Header */}
       <View className="mb-2.5 flex-row items-center justify-between">
         <View className="flex-row items-center">
+          {/* Icon container with subtle blur */}
           <View
             style={{ 
               width: iconContainerSize,
@@ -627,28 +696,45 @@ function FullWidthHealthCard({
               alignItems: 'center',
               justifyContent: 'center',
               borderRadius: getResponsiveSize.scale(12),
-              backgroundColor: '#FFFFFF',
+              overflow: 'hidden',
             }}
           >
-            <Ionicons name={icon} size={iconSize} color={iconColor} />
+            <BlurView
+              intensity={Platform.OS === 'ios' ? 15 : 10}
+              tint="light"
+              style={{
+                position: 'absolute',
+                top: 0,
+                left: 0,
+                right: 0,
+                bottom: 0,
+                backgroundColor: 'rgba(255, 255, 255, 0.8)',
+              }}
+            />
+            <View style={{ position: 'relative', zIndex: 1 }}>
+              <Ionicons name={icon} size={iconSize} color={iconColor} />
+            </View>
           </View>
           <Text
-            numberOfLines={1}
-            ellipsizeMode="tail"
+              numberOfLines={1}
+              ellipsizeMode="tail"
             style={{
               fontFamily: 'Satoshi-Medium',
               fontWeight: '600',
               color: '#111827',
-              fontSize: titleFontSize,
-              marginLeft: 8,
-              lineHeight: titleFontSize * 1.3,
+                fontSize: titleFontSize,
+                marginLeft: 8,
+                lineHeight: titleFontSize * 1.3,
               letterSpacing: -0.2,
             }}
           >
             {title}
           </Text>
         </View>
-        <TouchableOpacity activeOpacity={0.7} style={{ alignItems: 'center', justifyContent: 'center' }}>
+          <TouchableOpacity
+            activeOpacity={0.7}
+            style={{ alignItems: 'center', justifyContent: 'center' }}
+          >
           <Svg width={16} height={16} viewBox="0 0 24 24" fill="none">
             <Path
               d="M7 7h10v10"
@@ -672,14 +758,14 @@ function FullWidthHealthCard({
       <View className="mb-2.5 flex-row items-baseline justify-between">
         <View className="flex-row items-baseline">
           <Text
-            numberOfLines={1}
-            ellipsizeMode="tail"
+              numberOfLines={1}
+              ellipsizeMode="tail"
             style={{
               fontFamily: 'Satoshi-Medium',
               fontWeight: '700',
               color: '#111827',
-              fontSize: valueFontSize,
-              lineHeight: valueFontSize * 1.2,
+                fontSize: valueFontSize,
+                lineHeight: valueFontSize * 1.2,
               letterSpacing: -0.5,
             }}
           >
@@ -687,15 +773,15 @@ function FullWidthHealthCard({
           </Text>
           {unit && (
             <Text
-              numberOfLines={1}
-              ellipsizeMode="tail"
+                numberOfLines={1}
+                ellipsizeMode="tail"
               style={{
                 fontFamily: 'Satoshi-Medium',
                 fontWeight: '500',
                 color: '#6B7280',
-                fontSize: unitFontSize,
-                marginLeft: 4,
-                lineHeight: unitFontSize * 1.3,
+                  fontSize: unitFontSize,
+                  marginLeft: 4,
+                  lineHeight: unitFontSize * 1.3,
                 letterSpacing: -0.3,
               }}
             >
@@ -706,34 +792,34 @@ function FullWidthHealthCard({
         {status && (
           <View className="flex-row items-center">
             <View 
-              className="h-1.5 w-1.5 rounded-full mr-1.5"
+                className="mr-1.5 h-1.5 w-1.5 rounded-full"
               style={{ backgroundColor: iconColor }}
             />
             <Text
-              numberOfLines={1}
-              ellipsizeMode="tail"
+                numberOfLines={1}
+                ellipsizeMode="tail"
               style={{
                 fontFamily: 'Satoshi-Medium',
                 fontWeight: '600',
                 color: '#111827',
-                fontSize: subtitleFontSize,
-                marginRight: 4,
+                  fontSize: subtitleFontSize,
+                  marginRight: 4,
                 textTransform: 'capitalize',
-                lineHeight: subtitleFontSize * 1.3,
+                  lineHeight: subtitleFontSize * 1.3,
                 letterSpacing: 0.2,
               }}
             >
               {temperatureTrend}
             </Text>
             <Text
-              numberOfLines={1}
-              ellipsizeMode="tail"
+                numberOfLines={1}
+                ellipsizeMode="tail"
               style={{
                 fontFamily: 'Satoshi-Medium',
                 fontWeight: '400',
                 color: '#6B7280',
-                fontSize: subtitleFontSize,
-                lineHeight: subtitleFontSize * 1.3,
+                  fontSize: subtitleFontSize,
+                  lineHeight: subtitleFontSize * 1.3,
                 letterSpacing: 0.1,
               }}
             >
@@ -744,8 +830,8 @@ function FullWidthHealthCard({
       </View>
 
       {/* Temperature Graph */}
-      <View className="mb-2.5" style={{ height: graphHeight }}>
-        <Svg width="100%" height={graphHeight} viewBox="0 0 200 32">
+        <View className="mb-2.5" style={{ height: graphHeight }}>
+          <Svg width="100%" height={graphHeight} viewBox="0 0 200 32">
           <Polyline
             points="0,20 15,18 30,16 45,18 60,20 75,18 90,16 105,18 120,20 135,18 150,16 165,18 180,20 195,18 200,16"
             fill="none"
@@ -763,29 +849,29 @@ function FullWidthHealthCard({
         {/* Daily Average */}
         <View style={{ flex: 1 }}>
           <Text
-            numberOfLines={1}
-            ellipsizeMode="tail"
+              numberOfLines={1}
+              ellipsizeMode="tail"
             style={{
               fontFamily: 'Satoshi-Medium',
               fontWeight: '400',
               color: '#9CA3AF',
-              fontSize: subtitleFontSize - 1,
-              marginBottom: 2,
-              lineHeight: (subtitleFontSize - 1) * 1.3,
+                fontSize: subtitleFontSize - 1,
+                marginBottom: 2,
+                lineHeight: (subtitleFontSize - 1) * 1.3,
               letterSpacing: 0.2,
             }}
           >
             Daily Avg
           </Text>
           <Text
-            numberOfLines={1}
-            ellipsizeMode="tail"
+              numberOfLines={1}
+              ellipsizeMode="tail"
             style={{
               fontFamily: 'Satoshi-Medium',
               fontWeight: '600',
               color: '#111827',
-              fontSize: subtitleFontSize,
-              lineHeight: subtitleFontSize * 1.3,
+                fontSize: subtitleFontSize,
+                lineHeight: subtitleFontSize * 1.3,
               letterSpacing: -0.2,
             }}
           >
@@ -796,29 +882,29 @@ function FullWidthHealthCard({
         {/* Temperature Range */}
         <View style={{ flex: 1, alignItems: 'center' }}>
           <Text
-            numberOfLines={1}
-            ellipsizeMode="tail"
+              numberOfLines={1}
+              ellipsizeMode="tail"
             style={{
               fontFamily: 'Satoshi-Medium',
               fontWeight: '400',
               color: '#9CA3AF',
-              fontSize: subtitleFontSize - 1,
-              marginBottom: 2,
-              lineHeight: (subtitleFontSize - 1) * 1.3,
+                fontSize: subtitleFontSize - 1,
+                marginBottom: 2,
+                lineHeight: (subtitleFontSize - 1) * 1.3,
               letterSpacing: 0.2,
             }}
           >
             Range
           </Text>
           <Text
-            numberOfLines={1}
-            ellipsizeMode="tail"
+              numberOfLines={1}
+              ellipsizeMode="tail"
             style={{
               fontFamily: 'Satoshi-Medium',
               fontWeight: '600',
               color: '#111827',
-              fontSize: subtitleFontSize,
-              lineHeight: subtitleFontSize * 1.3,
+                fontSize: subtitleFontSize,
+                lineHeight: subtitleFontSize * 1.3,
               letterSpacing: -0.2,
             }}
           >
@@ -829,29 +915,29 @@ function FullWidthHealthCard({
         {/* Last Reading */}
         <View style={{ flex: 1, alignItems: 'flex-end' }}>
           <Text
-            numberOfLines={1}
-            ellipsizeMode="tail"
+              numberOfLines={1}
+              ellipsizeMode="tail"
             style={{
               fontFamily: 'Satoshi-Medium',
               fontWeight: '400',
               color: '#9CA3AF',
-              fontSize: subtitleFontSize - 1,
-              marginBottom: 2,
-              lineHeight: (subtitleFontSize - 1) * 1.3,
+                fontSize: subtitleFontSize - 1,
+                marginBottom: 2,
+                lineHeight: (subtitleFontSize - 1) * 1.3,
               letterSpacing: 0.2,
             }}
           >
             Last Reading
           </Text>
           <Text
-            numberOfLines={1}
-            ellipsizeMode="tail"
+              numberOfLines={1}
+              ellipsizeMode="tail"
             style={{
               fontFamily: 'Satoshi-Medium',
               fontWeight: '600',
               color: '#111827',
-              fontSize: subtitleFontSize,
-              lineHeight: subtitleFontSize * 1.3,
+                fontSize: subtitleFontSize,
+                lineHeight: subtitleFontSize * 1.3,
               letterSpacing: -0.2,
             }}
           >
@@ -889,7 +975,7 @@ export default function WearableTracking() {
           fontWeight: '500',
           color: textColor,
           fontSize: headerFontSize,
-          marginBottom: getResponsiveSize.scaleHeight(8),
+          marginBottom: getResponsiveSize.scaleHeight(6),
           lineHeight: headerFontSize * 1.2,
           letterSpacing: -0.4,
         }}
@@ -904,18 +990,18 @@ export default function WearableTracking() {
           fontWeight: '400',
           color: secondaryTextColor,
           fontSize: subheaderFontSize,
-          marginBottom: getResponsiveSize.scaleHeight(24),
+          marginBottom: getResponsiveSize.scaleHeight(16),
           lineHeight: subheaderFontSize * 1.4,
           letterSpacing: 0.2,
         }}
       >
-        Gentle insights from your body in real time.
+   Instant insights from your mind and body.
       </Text>
 
       {/* Health Metrics Grid */}
-      <View style={{ gap: 12 }}>
+      <View style={{ gap: 8 }}>
         {/* Row 1: Heart Rate and HRV */}
-        <View className="flex-row" style={{ gap: 12 }}>
+        <View className="flex-row" style={{ gap: 8 }}>
           <HealthCard
             title="Heart Rate"
             value="142"
@@ -941,7 +1027,7 @@ export default function WearableTracking() {
         <HealthScoreCard />
 
         {/* Row 3: Stress Score and Sleep Score */}
-        <View className="flex-row" style={{ gap: 12 }}>
+        <View className="flex-row" style={{ gap: 8 }}>
           <HealthCard
             title="Stress Score"
             value="24"

@@ -1,15 +1,22 @@
-import { Text, View, Animated, Easing } from 'react-native'
+import { Text, View, Animated, Easing, Dimensions } from 'react-native'
 import { useFonts } from 'expo-font'
 import { useEffect, useRef, useState } from 'react'
+
+const { width: SCREEN_WIDTH } = Dimensions.get('window')
 
 export default function LiveTracker() {
   const textColor = '#111827'
   const secondaryTextColor = '#6B7280'
-  const bgColor = '#EFEDE5'
+  const bgColor = '#FEE2E2' // Light pink/peach background
 
   const [fontsLoaded] = useFonts({
     'Satoshi-Medium': require('@/assets/fonts/Satoshi-Medium copy.otf'),
   })
+
+  // Responsive sizing
+  const cardPadding = Math.max(10, Math.min(14, SCREEN_WIDTH * 0.037))
+  const fontSize = Math.max(13, Math.min(15, SCREEN_WIDTH * 0.035))
+  const indicatorSize = Math.max(6, Math.min(8, SCREEN_WIDTH * 0.021))
 
   // Animated values for blinking and pulsing effects
   const blinkAnim = useRef(new Animated.Value(1)).current
@@ -105,16 +112,18 @@ export default function LiveTracker() {
 
   // Determine background color based on alert status
   const cardBgColor = currentMessage.actionRequired
-    ? '#FEE2E2' // Light red background for alerts
-    : bgColor // Default beige background
+    ? '#FFF5EB' // Very light warm peach background for alerts
+    : '#FAFAF9' // Very light beige background for normal
 
   return (
-    <View className="mb-4 w-full">
+    <View className="mb-3 w-full">
       {/* Live Health Ticker Card */}
       <View
-        className="rounded-2xl p-5"
+        className="rounded-2xl"
         style={{
           backgroundColor: cardBgColor,
+          paddingHorizontal: cardPadding,
+          paddingVertical: cardPadding - 2,
         }}
       >
         {/* Current Message Display */}
@@ -122,22 +131,29 @@ export default function LiveTracker() {
           <Animated.View
             style={{
               opacity: blinkAnim,
-              marginRight: 8,
+              marginRight: 10,
               alignSelf: 'center',
             }}
           >
             <View
-              className="h-3 w-3 rounded-full"
-              style={{ backgroundColor: '#22C55E' }}
+              style={{
+                width: indicatorSize,
+                height: indicatorSize,
+                borderRadius: indicatorSize / 2,
+                backgroundColor: '#22C55E',
+              }}
             />
           </Animated.View>
           <Text
-            className="flex-1 text-base leading-7"
+            numberOfLines={2}
+            ellipsizeMode="tail"
+            className="flex-1"
             style={{
               fontFamily: 'Satoshi-Medium',
               fontWeight: '500',
               color: textColor,
-              lineHeight: 26,
+              fontSize: fontSize,
+              lineHeight: fontSize * 1.4,
               letterSpacing: -0.2,
             }}
           >
@@ -148,7 +164,7 @@ export default function LiveTracker() {
                   fontFamily: 'Satoshi-Medium',
                   fontWeight: '600',
                   color: '#EF4444',
-                  letterSpacing: 0.3,
+                  letterSpacing: 0.2,
                 }}
               >
                 {' Alert'}

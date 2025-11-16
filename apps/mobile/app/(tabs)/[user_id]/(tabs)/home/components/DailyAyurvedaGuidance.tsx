@@ -18,7 +18,7 @@ const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window')
 // Responsive size calculations
 const CARD_WIDTH = SCREEN_WIDTH - 48 // Full width minus padding
 const CARD_PADDING = Math.max(12, Math.min(16, SCREEN_WIDTH * 0.038))
-const CARD_TEXT_WIDTH = CARD_WIDTH - (CARD_PADDING * 2) // Text area width for full cards
+const CARD_TEXT_WIDTH = CARD_WIDTH - CARD_PADDING * 2 // Text area width for full cards
 
 const getResponsiveSize = {
   // Base sizes scaled by screen width (using 375 as base iPhone width)
@@ -137,15 +137,15 @@ export default function DailyAyurvedaGuidance() {
         ellipsizeMode="tail"
         style={{
           fontFamily: 'Satoshi-Medium',
-          fontWeight: '500',
+          fontWeight: '600',
           color: textColor,
           fontSize: headerFontSize,
           marginBottom: getResponsiveSize.scaleHeight(8),
           lineHeight: headerFontSize * 1.2,
-          letterSpacing: -0.4,
+          letterSpacing: -0.3,
         }}
       >
-        Daily Ayurveda Guidance
+        Today's Dosha Guidance
       </Text>
       <Text
         numberOfLines={2}
@@ -157,10 +157,10 @@ export default function DailyAyurvedaGuidance() {
           fontSize: subheaderFontSize,
           marginBottom: getResponsiveSize.scaleHeight(24),
           lineHeight: subheaderFontSize * 1.4,
-          letterSpacing: 0.2,
+          letterSpacing: 0.1,
         }}
       >
-        Personalized insights based on your body's current state.
+        Quick entries for a clearer day.
       </Text>
 
       {/* Premium Guidance Card */}
@@ -284,8 +284,8 @@ export default function DailyAyurvedaGuidance() {
             {/* Header */}
             <View
               className="flex-row items-center justify-between border-b"
-              style={{ 
-                borderColor: '#F3F4F6',
+              style={{
+                borderColor: 'rgba(0, 0, 0, 0.08)', // Light visible border
                 paddingHorizontal: getResponsiveSize.spacing.modalPadding,
                 paddingBottom: getResponsiveSize.scaleHeight(20),
               }}
@@ -308,7 +308,11 @@ export default function DailyAyurvedaGuidance() {
                     elevation: 4,
                   }}
                 >
-                  <Ionicons name="leaf" size={getResponsiveSize.icon.modal} color="#D97706" />
+                  <Ionicons
+                    name="leaf"
+                    size={getResponsiveSize.icon.modal}
+                    color="#D97706"
+                  />
                 </LinearGradient>
                 <Text
                   numberOfLines={1}
@@ -342,16 +346,20 @@ export default function DailyAyurvedaGuidance() {
                   elevation: 2,
                 }}
               >
-                <Ionicons name="close" size={getResponsiveSize.icon.close} color={textColor} />
+                <Ionicons
+                  name="close"
+                  size={getResponsiveSize.icon.close}
+                  color={textColor}
+                />
               </TouchableOpacity>
             </View>
 
             {/* Content */}
             <ScrollView
               className="flex-1"
-              contentContainerStyle={{ 
-                padding: getResponsiveSize.spacing.modalPadding, 
-                paddingBottom: getResponsiveSize.scaleHeight(40) 
+              contentContainerStyle={{
+                padding: getResponsiveSize.spacing.modalPadding,
+                paddingBottom: getResponsiveSize.scaleHeight(40),
               }}
               showsVerticalScrollIndicator={false}
             >
@@ -429,7 +437,7 @@ export default function DailyAyurvedaGuidance() {
                     borderRadius: getResponsiveSize.scale(20),
                     padding: getResponsiveSize.spacing.modalPadding,
                     borderWidth: 1,
-                    borderColor: '#F3F4F6',
+                    borderColor: 'rgba(0, 0, 0, 0.08)', // Light visible border
                   }}
                 >
                   <View className="mb-4 flex-row items-center">
@@ -459,8 +467,8 @@ export default function DailyAyurvedaGuidance() {
                     </Text>
                   </View>
                   {section.items.map((item, itemIndex) => (
-                    <View 
-                      key={itemIndex} 
+                    <View
+                      key={itemIndex}
                       className="flex-row items-start"
                       style={{ marginBottom: getResponsiveSize.scaleHeight(12) }}
                     >
@@ -472,7 +480,8 @@ export default function DailyAyurvedaGuidance() {
                           marginTop: 2,
                           alignItems: 'center',
                           justifyContent: 'center',
-                          borderRadius: Math.max(20, Math.min(24, SCREEN_WIDTH * 0.064)) / 2,
+                          borderRadius:
+                            Math.max(20, Math.min(24, SCREEN_WIDTH * 0.064)) / 2,
                           backgroundColor: 'rgba(217, 119, 6, 0.1)',
                         }}
                       >
@@ -480,7 +489,8 @@ export default function DailyAyurvedaGuidance() {
                           style={{
                             width: Math.max(6, Math.min(8, SCREEN_WIDTH * 0.021)),
                             height: Math.max(6, Math.min(8, SCREEN_WIDTH * 0.021)),
-                            borderRadius: Math.max(6, Math.min(8, SCREEN_WIDTH * 0.021)) / 2,
+                            borderRadius:
+                              Math.max(6, Math.min(8, SCREEN_WIDTH * 0.021)) / 2,
                             backgroundColor: '#D97706',
                           }}
                         />
